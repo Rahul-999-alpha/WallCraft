@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WallCraft</string>
+    <string name="live_wallpaper_name">WallCraft Parallax</string>
+    <string name="live_wallpaper_description">Parallax live wallpaper powered by WallCraft</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_browse">Browse</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_ai_create">AI Create</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home Screen -->
+    <string name="editor_picks">Editor\'s Picks</string>
+    <string name="categories">Categories</string>
+    <string name="trending">Trending</string>
+    <string name="see_all">See All</string>
+
+    <!-- Search -->
+    <string name="search_wallpapers">Search wallpapers…</string>
+    <string name="no_results">No wallpapers found</string>
+
+    <!-- Detail Screen -->
+    <string name="set_wallpaper">Set Wallpaper</string>
+    <string name="download">Download</string>
+    <string name="share">Share</string>
+    <string name="set_home_screen">Home Screen</string>
+    <string name="set_lock_screen">Lock Screen</string>
+    <string name="set_both">Both</string>
+    <string name="wallpaper_set_success">Wallpaper set successfully!</string>
+    <string name="wallpaper_download_success">Wallpaper saved to gallery!</string>
+    <string name="wallpaper_set_failed">Failed to set wallpaper</string>
+    <string name="set_as_live_wallpaper">Set as Live Wallpaper</string>
+
+    <!-- AI Generate -->
+    <string name="ai_generate_title">AI Create</string>
+    <string name="describe_wallpaper">Describe your wallpaper</string>
+    <string name="ai_prompt_hint">A serene mountain lake at sunset…</string>
+    <string name="style">Style</string>
+    <string name="amoled_optimized">AMOLED Optimized</string>
+    <string name="amoled_description">Pure black background, high contrast</string>
+    <string name="generate">Generate Wallpaper</string>
+    <string name="generating">Generating…</string>
+    <string name="generations_remaining">Generations remaining</string>
+    <string name="watch_ad_bonus">Watch ad for bonus generations</string>
+    <string name="no_generations_left">No generations remaining. Watch an ad for more!</string>
+
+    <!-- Favorites -->
+    <string name="no_favorites">No favorites yet</string>
+    <string name="no_favorites_description">Tap the heart icon on any wallpaper\nto add it to your favorites</string>
+
+    <!-- Settings -->
+    <string name="image_quality">Image Quality</string>
+    <string name="data_saver">Data Saver</string>
+    <string name="data_saver_description">Load lower quality images on mobile data</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="about">About</string>
+    <string name="version">Version %s</string>
+    <string name="rate_app">Rate App</string>
+    <string name="privacy_policy">Privacy Policy</string>
+
+    <!-- Categories -->
+    <string name="category_amoled">AMOLED Dark</string>
+    <string name="category_nature">Nature</string>
+    <string name="category_abstract">Abstract</string>
+    <string name="category_minimal">Minimal</string>
+    <string name="category_anime">Anime</string>
+    <string name="category_cars">Cars</string>
+    <string name="category_space">Space</string>
+    <string name="category_city">City</string>
+    <string name="category_animals">Animals</string>
+    <string name="category_sports">Sports</string>
+    <string name="category_flowers">Flowers</string>
+    <string name="category_travel">Travel</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_discover_title">Discover Wallpapers</string>
+    <string name="onboarding_discover_desc">Browse thousands of stunning wallpapers from multiple sources, curated for your phone</string>
+    <string name="onboarding_ai_title">Create with AI</string>
+    <string name="onboarding_ai_desc">Generate unique wallpapers with AI. Just describe what you want and watch the magic happen</string>
+    <string name="onboarding_set_title">Set Instantly</string>
+    <string name="onboarding_set_desc">Set wallpapers to your home screen, lock screen, or both with a single tap</string>
+    <string name="skip">Skip</string>
+    <string name="next">Next</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- Errors -->
+    <string name="error_network">No internet connection</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="retry">Retry</string>
+</resources>
