@@ -237,7 +237,7 @@ fun SettingsScreen(
                         }
                     }
             ) {
-                Text("ClearWalls v1.0.0", style = MaterialTheme.typography.bodyLarge)
+                Text("ClearWalls v${com.rahul.clearwalls.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     "AI-powered wallpaper app",
