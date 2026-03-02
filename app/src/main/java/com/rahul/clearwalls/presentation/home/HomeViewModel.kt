@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.map
 import com.rahul.clearwalls.domain.model.Category
 import com.rahul.clearwalls.domain.model.Wallpaper
+import com.rahul.clearwalls.domain.repository.FavoriteRepository
 import com.rahul.clearwalls.domain.usecase.GetCategoriesUseCase
 import com.rahul.clearwalls.domain.usecase.GetEditorPicksUseCase
 import com.rahul.clearwalls.domain.usecase.GetWallpapersUseCase
@@ -15,6 +17,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,14 +27,30 @@ class HomeViewModel @Inject constructor(
     private val getWallpapersUseCase: GetWallpapersUseCase,
     private val getEditorPicksUseCase: GetEditorPicksUseCase,
     private val getCategoriesUseCase: GetCategoriesUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val favoriteRepository: FavoriteRepository
 ) : ViewModel() {
 
+    private val favoriteIds = favoriteRepository.getFavorites()
+        .map { favorites -> favorites.map { it.id }.toSet() }
+
     val wallpapers: Flow<PagingData<Wallpaper>> =
-        getWallpapersUseCase().cachedIn(viewModelScope)
+        getWallpapersUseCase()
+            .cachedIn(viewModelScope)
+            .combine(favoriteIds) { pagingData, favIds ->
+                pagingData.map { wallpaper ->
+                    wallpaper.copy(isFavorite = favIds.contains(wallpaper.id))
+                }
+            }
 
     val editorPicks: Flow<PagingData<Wallpaper>> =
-        getEditorPicksUseCase().cachedIn(viewModelScope)
+        getEditorPicksUseCase()
+            .cachedIn(viewModelScope)
+            .combine(favoriteIds) { pagingData, favIds ->
+                pagingData.map { wallpaper ->
+                    wallpaper.copy(isFavorite = favIds.contains(wallpaper.id))
+                }
+            }
 
     private val _categories = MutableStateFlow<List<Category>>(emptyList())
     val categories: StateFlow<List<Category>> = _categories.asStateFlow()

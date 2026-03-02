@@ -10,7 +10,7 @@
 # Gson
 -keepattributes Signature
 -keep class com.google.gson.** { *; }
--keep class com.rahul.wallcraft.data.remote.dto.** { *; }
+-keep class com.rahul.clearwalls.data.remote.dto.** { *; }
 
 # Room
 -keep class * extends androidx.room.RoomDatabase
@@ -23,8 +23,11 @@
 # Firebase
 -keep class com.google.firebase.** { *; }
 
-# Coil
+# Coil 3
 -keep class coil3.** { *; }
+-keep interface coil3.** { *; }
+-dontwarn coil3.**
+-keepclassmembers class coil3.** { *; }
 
 # Hilt
 -keep class dagger.hilt.** { *; }

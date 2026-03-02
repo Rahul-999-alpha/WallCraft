@@ -1,0 +1,7 @@
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.admin.AdminViewModel
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.admin.AdminViewModel
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.aigenerate.AiGenerateViewModel
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.aigenerate.AiGenerateViewModel
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.browse.BrowseViewModel
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.browse.BrowseViewModel
+-keep,allowobfuscation,allowshrinking class com.rahul.clearwalls.presentation.detail.WallpaperDetailViewModel

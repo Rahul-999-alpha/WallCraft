@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_dev</item>
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </array>
+    <string-array name="com_google_android_gms_fonts_certs_dev">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWFuGx90071MA0GCSqGSIb3DQEBBAUAMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2lkLmNvbTAeFw0wODA0MTUyMzM2NTZaFw0zNTA5MDEyMzM2NTZaMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2lkLmNvbTCCASAwDQYJKoZIhvcNAQEBBQADggENADCCAQgCggEBANbOLggKv+IxTdGNs8/TGFy0PTP6DHThvbbR24kT9ixcOd9W+EaBPWW+wPPKQmsHxajtWjmQwWfna8mZuSeJS48LIgAZlKkpFeVyxW0qMBujb8X8ETrWy550NaFtI6t9+u7hZeTfHwqNvacKhp1RbE6dBRGWynwMVX8XW8N1+UjFaq6GCJukT4qmpN2afb8sCjUigq0GuMwYXrFVee74bQgLHWGJwPmvmLHC69EH6kWr22ijx4OKXlSIx2xT1AsSHee70w5iDBiK4aph27yH3TxkXy9V89TDdexAcKk/cVHYNnDBapcavl7y0RiQ4biu8ymM8Ga/nmzhRKya6G0cGw8CAQOjgfwwgfkwHQYDVR0OBBYEFI0cxb6VBER8pLNSvtsYgw1KVJigMIHJBgNVHSMEgcEwgb6AFI0cxb6VBER8pLNSvtsYgw1KVJigoYGapIGXMIGUMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNTW91bnRhaW4gVmlldzEQMA4GA1UEChMHQW5kcm9pZDEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDEiMCAGCSqGSIb3DQEJARYTYW5kcm9pZEBhbmRyb2lkLmNvbYIJANWFuGx90071MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADggEBABnTDPEF9wil9ukwd1G9LnjLVXIb685YF+DVIrBOGNiICrqT0nDEklgagJfHAph8cqs9jsdOTBQiD3vKEBMSaSgl7bSWXp1MKpqEvMBqGFmMGCCxvwD6dMBKg5NZkqLNw0Fm7peQFMYR1Cx10gUOiavCYQ5Ap5FmEN8hZVxLl/dH0tWIEVGUGrodIWph3xr9JaJ1PHKD5G6sOZ/bBfLkr1cVKEmQQy6WXK8QT3P0e2GZBV40DaHpE6IkJG7hQwUaCHnFWcKqBgAwidJAjBGWfNM4yEKMsYF7kbXKFgjKSie1BtZ5FH7cmNQpujPMFxEV4mXMEtn/8gmpNXWWogCe8g0=
+        </item>
+    </string-array>
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEQzCCAyugAwIBAgIJAMLgh0ZkSjCNMA0GCSqGSIb3DQEBBAUAMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDAeFw0wODA4MjEyMzEzMzRaFw0zNjAxMDcyMzEzMzRaMHQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZDCCASAwDQYJKoZIhvcNAQEBBQADggENADCCAQgCggEBAKtWLgDYO6IIrgqWbxJOKdoR8qtW0I9Y4sypEwPpt1TTcvZApxsdyxMJZ2JORland2qSGT2y5b+3JKkedxiLDmpHpDsz2WCbdxgxRczfey5YZnTJ4VZbH0xqWVW/8lGmPav5xVwnIiJS6HXk+BVKZF+JcWjAsb/GEuq/eFdpuzSqeYTcfi6idkyugwfYwXFU1+5fZKUaRKYCwkkFQVfcAs1fXA5V+++FGfvjJ/CxURaSxaBvGdGDhfXE28LWuT9ozCl5xw4Yq5OGazvV24mZVSoOO0yZ31j7kYvtwYK6NeADwbSxDdJEqO4k//0zOHKrUiGYXtqw/A0LFFtqoZKFjnkCAQOjgdgwgdUwHQYDVR0OBBYEFMd9jMIhF1Ylmn/Tgt9r45jk14alMIGlBgNVHSMEgZ0wgZqAFMd9jMIhF1Ylmn/Tgt9r45jk14markup8ehGmkHkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1Nb3VudGFpbiBWaWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jLjEQMA4GA1UECxMHQW5kcm9pZDEQMA4GA1UEAxMHQW5kcm9pZIIJAMLgh0ZkSjCNMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEEBQADggEBABnTDPEF9wil9ukwd1G9LnjLVXIb685YF+DVIrBOGNiICrqT0nDEklgagJfHAph8cqs9jsdOTBQiD3vKEBMSaSgl7bSWXp1MKpqEvMBqGFmMGCCxvwD6dMBKg5NZkqLNw0Fm7peQFMYR1Cx10gUOiavCYQ5Ap5FmEN8hZVxLl/dH0tWIEVGUGrodIWph3xr9JaJ1PHKD5G6sOZ/bBfLkr1cVKEmQQy6WXK8QT3P0e2GZBV40DaHpE6IkJG7hQwUaCHnFWcKqBgAwidJAjBGWfNM4yEKMsYF7kbXKFgjKSie1BtZ5FH7cmNQpujPMFxEV4mXMEtn/8gmpNXWWogCe8g0=
+        </item>
+    </string-array>
+    <string name="about">About</string>
+    <string name="admin_panel">Admin Panel</string>
+    <string name="ai_generate_title">AI Create</string>
+    <string name="ai_prompt_hint">A serene mountain lake at sunset…</string>
+    <string name="amoled_description">Pure black background, high contrast</string>
+    <string name="amoled_optimized">AMOLED Optimized</string>
+    <string name="app_name">ClearWalls</string>
+    <string name="auto_wallpaper_changer">Auto Wallpaper Changer</string>
+    <string name="auto_wallpaper_description">Automatically change wallpaper from favorites</string>
+    <string name="categories">Categories</string>
+    <string name="category_abstract">Abstract</string>
+    <string name="category_amoled">AMOLED Dark</string>
+    <string name="category_animals">Animals</string>
+    <string name="category_anime">Anime</string>
+    <string name="category_cars">Cars</string>
+    <string name="category_city">City</string>
+    <string name="category_flowers">Flowers</string>
+    <string name="category_gradient">Gradient</string>
+    <string name="category_minimal">Minimal</string>
+    <string name="category_motivational">Motivational</string>
+    <string name="category_nature">Nature</string>
+    <string name="category_space">Space</string>
+    <string name="category_sports">Sports</string>
+    <string name="category_texture">Texture</string>
+    <string name="category_travel">Travel</string>
+    <string name="clear_cache">Clear Cache</string>
+    <string name="com.google.firebase.crashlytics.mapping_file_id" ns1:ignore="UnusedResources,TypographyDashes" translatable="false">00000000000000000000000000000000</string>
+    <string name="daily_curated">Daily Curated</string>
+    <string name="data_saver">Data Saver</string>
+    <string name="data_saver_description">Load lower quality images on mobile data</string>
+    <string name="describe_wallpaper">Describe your wallpaper</string>
+    <string name="download">Download</string>
+    <string name="editor_picks">Editor\'s Picks</string>
+    <string name="enter_password">Enter admin password</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_network">No internet connection</string>
+    <string name="for_you">For You</string>
+    <string name="gcm_defaultSenderId" translatable="false">000000000000</string>
+    <string name="generate">Generate Wallpaper</string>
+    <string name="generating">Generating…</string>
+    <string name="generations_remaining">Generations remaining</string>
+    <string name="get_started">Get Started</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="good_morning">Good morning</string>
+    <string name="google_api_key" translatable="false">placeholder-api-key</string>
+    <string name="google_app_id" translatable="false">1:000000000000:android:0000000000000001</string>
+    <string name="google_crash_reporting_api_key" translatable="false">placeholder-api-key</string>
+    <string name="google_storage_bucket" translatable="false">wallcraft-placeholder.appspot.com</string>
+    <string name="image_quality">Image Quality</string>
+    <string name="live_wallpaper_description">Parallax live wallpaper powered by ClearWalls</string>
+    <string name="live_wallpaper_name">ClearWalls Parallax</string>
+    <string name="nav_ai_create">AI Create</string>
+    <string name="nav_browse">Browse</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_settings">Settings</string>
+    <string name="next">Next</string>
+    <string name="no_favorites">No favorites yet</string>
+    <string name="no_favorites_description">Tap the heart icon on any wallpaper\nto add it to your favorites</string>
+    <string name="no_generations_left">No generations remaining. Watch an ad for more!</string>
+    <string name="no_results">No wallpapers found</string>
+    <string name="onboarding_ai_desc">Generate unique wallpapers with AI. Just describe what you want and watch the magic happen</string>
+    <string name="onboarding_ai_title">Create with AI</string>
+    <string name="onboarding_discover_desc">Browse thousands of stunning wallpapers from multiple sources, curated for your phone</string>
+    <string name="onboarding_discover_title">Discover Wallpapers</string>
+    <string name="onboarding_set_desc">Set wallpapers to your home screen, lock screen, or both with a single tap</string>
+    <string name="onboarding_set_title">Set Instantly</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="project_id" translatable="false">wallcraft-placeholder</string>
+    <string name="rate_app">Rate App</string>
+    <string name="retry">Retry</string>
+    <string name="search_wallpapers">Search wallpapers…</string>
+    <string name="see_all">See All</string>
+    <string name="select_quality">Select Quality</string>
+    <string name="set_as_live_wallpaper">Set as Live Wallpaper</string>
+    <string name="set_both">Both</string>
+    <string name="set_home_screen">Home Screen</string>
+    <string name="set_lock_screen">Lock Screen</string>
+    <string name="set_wallpaper">Set Wallpaper</string>
+    <string name="share">Share</string>
+    <string name="skip">Skip</string>
+    <string name="style">Style</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_mode">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="trending">Trending</string>
+    <string name="version">Version %s</string>
+    <string name="wallpaper_download_success">Wallpaper saved to gallery!</string>
+    <string name="wallpaper_set_failed">Failed to set wallpaper</string>
+    <string name="wallpaper_set_success">Wallpaper set successfully!</string>
+    <string name="watch_ad_bonus">Watch ad for bonus generations</string>
+    <string name="watch_ad_to_unlock">Watch ad to unlock</string>
+    <style name="Theme.ClearWalls" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

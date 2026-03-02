@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -225,14 +224,6 @@ fun WallpaperDetailScreen(
                     icon = Icons.Default.Wallpaper,
                     label = "Set",
                     onClick = { showSetSheet = true }
-                )
-                ActionButton(
-                    icon = Icons.Default.Share,
-                    label = "Share",
-                    onClick = {
-                        // Share the wallpaper URL
-                        wallpaper?.sourceUrl?.let { /* handled externally */ }
-                    }
                 )
             }
         }

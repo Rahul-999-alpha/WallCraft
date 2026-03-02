@@ -1,0 +1,62 @@
+[
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/xml_wallpaper.xml.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/xml/wallpaper.xml"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.rahul.clearwalls.app-debug-95:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.rahul.clearwalls.app-main-97:/mipmap-xxhdpi/ic_launcher.png"
+    }
+]
