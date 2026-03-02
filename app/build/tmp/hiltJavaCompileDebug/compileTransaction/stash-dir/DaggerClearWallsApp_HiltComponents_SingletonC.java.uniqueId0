@@ -605,7 +605,7 @@ public final class DaggerClearWallsApp_HiltComponents_SingletonC {
           return (T) new FavoritesViewModel(singletonCImpl.favoriteRepositoryImplProvider.get(), viewModelCImpl.toggleFavoriteUseCase());
 
           case 4: // com.rahul.clearwalls.presentation.home.HomeViewModel 
-          return (T) new HomeViewModel(viewModelCImpl.getWallpapersUseCase(), viewModelCImpl.getEditorPicksUseCase(), viewModelCImpl.getCategoriesUseCase(), viewModelCImpl.toggleFavoriteUseCase());
+          return (T) new HomeViewModel(viewModelCImpl.getWallpapersUseCase(), viewModelCImpl.getEditorPicksUseCase(), viewModelCImpl.getCategoriesUseCase(), viewModelCImpl.toggleFavoriteUseCase(), singletonCImpl.favoriteRepositoryImplProvider.get());
 
           case 5: // com.rahul.clearwalls.presentation.search.SearchViewModel 
           return (T) new SearchViewModel(viewModelCImpl.searchWallpapersUseCase(), viewModelCImpl.toggleFavoriteUseCase());

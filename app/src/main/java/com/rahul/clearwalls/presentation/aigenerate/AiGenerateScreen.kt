@@ -19,7 +19,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +29,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -39,23 +42,40 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.rahul.clearwalls.core.util.AdManager
 import com.rahul.clearwalls.domain.model.AiStyle
 import com.rahul.clearwalls.domain.model.Wallpaper
 import com.rahul.clearwalls.presentation.components.AdBanner
+import androidx.compose.ui.platform.LocalContext as AndroidContext
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AiGenerateScreen(
     onWallpaperClick: (Wallpaper) -> Unit,
-    viewModel: AiGenerateViewModel = hiltViewModel()
+    viewModel: AiGenerateViewModel = hiltViewModel(),
+    adManager: AdManager = hiltViewModel<AiGenerateViewModel>().let {
+        // Get AdManager from context
+        val context = LocalContext.current
+        remember {
+            try {
+                (context.applicationContext as? com.rahul.clearwalls.ClearWallsApp)?.adManager
+                    ?: error("AdManager not available")
+            } catch (e: Exception) {
+                error("Failed to get AdManager: ${e.message}")
+            }
+        }
+    }
 ) {
     val prompt by viewModel.prompt.collectAsState()
     val selectedStyle by viewModel.selectedStyle.collectAsState()
@@ -64,6 +84,8 @@ fun AiGenerateScreen(
     val quota by viewModel.quota.collectAsState()
     val generatedWallpaper by viewModel.generatedWallpaper.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { message ->
@@ -98,28 +120,72 @@ fun AiGenerateScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Quota display
+            // Quota display with Watch Ad button
             quota?.let { q ->
                 Card(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            text = "Generations remaining",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "${q.totalRemaining}",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Generations remaining",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = "${q.totalRemaining}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (q.canGenerate) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.error
+                                }
+                            )
+                        }
+
+                        // Watch Ad button when out of credits
+                        if (!q.canGenerate) {
+                            OutlinedButton(
+                                onClick = {
+                                    val activity = context as? android.app.Activity
+                                    if (activity != null) {
+                                        adManager.showRewarded(
+                                            activity = activity,
+                                            onRewarded = {
+                                                viewModel.onAdWatched()
+                                            },
+                                            onFailed = {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar(
+                                                        "Ad not available. Try again later."
+                                                    )
+                                                }
+                                            }
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.PlayArrow,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text("  Watch Ad for Bonus Credits")
+                            }
+                        }
                     }
                 }
             }
@@ -179,7 +245,7 @@ fun AiGenerateScreen(
             // Generate button
             Button(
                 onClick = { viewModel.generate() },
-                enabled = !isGenerating && prompt.isNotBlank(),
+                enabled = !isGenerating && prompt.isNotBlank() && (quota?.canGenerate == true),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
