@@ -16,11 +16,11 @@ val localProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.rahul.wallcraft"
+    namespace = "com.rahul.clearwalls"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.rahul.wallcraft"
+        applicationId = "com.rahul.clearwalls"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -35,6 +35,11 @@ android {
         buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"${localProperties.getProperty("ADMOB_INTERSTITIAL_ID", "")}\"")
         buildConfigField("String", "ADMOB_REWARDED_ID", "\"${localProperties.getProperty("ADMOB_REWARDED_ID", "")}\"")
         buildConfigField("String", "ADMOB_NATIVE_ID", "\"${localProperties.getProperty("ADMOB_NATIVE_ID", "")}\"")
+        buildConfigField("String", "ADMOB_APP_OPEN_ID", "\"${localProperties.getProperty("ADMOB_APP_OPEN_ID", "")}\"")
+        buildConfigField("String", "PEXELS_API_KEY", "\"${localProperties.getProperty("PEXELS_API_KEY", "")}\"")
+        buildConfigField("String", "UNSPLASH_ACCESS_KEY", "\"${localProperties.getProperty("UNSPLASH_ACCESS_KEY", "")}\"")
+        buildConfigField("String", "PINTEREST_ACCESS_TOKEN", "\"${localProperties.getProperty("PINTEREST_ACCESS_TOKEN", "")}\"")
+        buildConfigField("String", "FREEPIK_API_KEY", "\"${localProperties.getProperty("FREEPIK_API_KEY", "")}\"")
 
         manifestPlaceholders["admobAppId"] = localProperties.getProperty("ADMOB_APP_ID", "ca-app-pub-3940256099942544~3347511713")
     }
@@ -47,6 +52,7 @@ android {
             buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
             buildConfigField("String", "ADMOB_REWARDED_ID", "\"ca-app-pub-3940256099942544/5224354917\"")
             buildConfigField("String", "ADMOB_NATIVE_ID", "\"ca-app-pub-3940256099942544/2247696110\"")
+            buildConfigField("String", "ADMOB_APP_OPEN_ID", "\"ca-app-pub-3940256099942544/9257395921\"")
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
         }
         release {
@@ -80,6 +86,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-process:2.8.7")
     implementation("androidx.activity:activity-compose:1.9.3")
 
     // Compose BOM
@@ -101,6 +108,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.54")
     ksp("com.google.dagger:hilt-compiler:2.54")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
 
     // Retrofit + OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
@@ -138,6 +147,12 @@ dependencies {
 
     // Splash Screen
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+
+    // Google Fonts for Compose
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.6")
 
     // Gson
     implementation("com.google.code.gson:gson:2.11.0")

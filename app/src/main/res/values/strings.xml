@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WallCraft</string>
-    <string name="live_wallpaper_name">WallCraft Parallax</string>
-    <string name="live_wallpaper_description">Parallax live wallpaper powered by WallCraft</string>
+    <string name="app_name">ClearWalls</string>
+    <string name="live_wallpaper_name">ClearWalls Parallax</string>
+    <string name="live_wallpaper_description">Parallax live wallpaper powered by ClearWalls</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -17,6 +17,11 @@
     <string name="categories">Categories</string>
     <string name="trending">Trending</string>
     <string name="see_all">See All</string>
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="daily_curated">Daily Curated</string>
+    <string name="for_you">For You</string>
 
     <!-- Search -->
     <string name="search_wallpapers">Search wallpapers…</string>
@@ -33,6 +38,8 @@
     <string name="wallpaper_download_success">Wallpaper saved to gallery!</string>
     <string name="wallpaper_set_failed">Failed to set wallpaper</string>
     <string name="set_as_live_wallpaper">Set as Live Wallpaper</string>
+    <string name="select_quality">Select Quality</string>
+    <string name="watch_ad_to_unlock">Watch ad to unlock</string>
 
     <!-- AI Generate -->
     <string name="ai_generate_title">AI Create</string>
@@ -60,6 +67,13 @@
     <string name="version">Version %s</string>
     <string name="rate_app">Rate App</string>
     <string name="privacy_policy">Privacy Policy</string>
+    <string name="theme_mode">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="auto_wallpaper_changer">Auto Wallpaper Changer</string>
+    <string name="auto_wallpaper_description">Automatically change wallpaper from favorites</string>
 
     <!-- Categories -->
     <string name="category_amoled">AMOLED Dark</string>
@@ -74,6 +88,9 @@
     <string name="category_sports">Sports</string>
     <string name="category_flowers">Flowers</string>
     <string name="category_travel">Travel</string>
+    <string name="category_motivational">Motivational</string>
+    <string name="category_gradient">Gradient</string>
+    <string name="category_texture">Texture</string>
 
     <!-- Onboarding -->
     <string name="onboarding_discover_title">Discover Wallpapers</string>
@@ -90,4 +107,8 @@
     <string name="error_network">No internet connection</string>
     <string name="error_generic">Something went wrong</string>
     <string name="retry">Retry</string>
+
+    <!-- Admin -->
+    <string name="admin_panel">Admin Panel</string>
+    <string name="enter_password">Enter admin password</string>
 </resources>

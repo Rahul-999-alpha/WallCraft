@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WallCraft</string>
-    <string name="live_wallpaper_name">WallCraft पैरालैक्स</string>
-    <string name="live_wallpaper_description">WallCraft द्वारा संचालित पैरालैक्स लाइव वॉलपेपर</string>
+    <string name="app_name">ClearWalls</string>
+    <string name="live_wallpaper_name">ClearWalls पैरालैक्स</string>
+    <string name="live_wallpaper_description">ClearWalls द्वारा संचालित पैरालैक्स लाइव वॉलपेपर</string>
 
     <!-- Navigation -->
     <string name="nav_home">होम</string>

@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "WallCraft"
+rootProject.name = "ClearWalls"
 include(":app")
