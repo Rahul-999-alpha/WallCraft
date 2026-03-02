@@ -2,6 +2,7 @@ package com.rahul.clearwalls.core.util
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
@@ -25,6 +26,9 @@ import javax.inject.Singleton
 class AdManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    companion object {
+        private const val TAG = "AdManager"
+    }
     private var interstitialAd: InterstitialAd? = null
     private var rewardedAd: RewardedAd? = null
     private var appOpenAd: AppOpenAd? = null
@@ -39,6 +43,7 @@ class AdManager @Inject constructor(
     val nativeAd: StateFlow<NativeAd?> = _nativeAd.asStateFlow()
 
     fun preloadInterstitial() {
+        Log.d(TAG, "📢 Preloading interstitial ad...")
         val adRequest = AdRequest.Builder().build()
         InterstitialAd.load(
             context,
@@ -46,10 +51,12 @@ class AdManager @Inject constructor(
             adRequest,
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
+                    Log.d(TAG, "✅ Interstitial ad loaded successfully")
                     interstitialAd = ad
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.e(TAG, "❌ Interstitial ad failed: ${error.message} (code: ${error.code})")
                     interstitialAd = null
                 }
             }
@@ -57,6 +64,7 @@ class AdManager @Inject constructor(
     }
 
     fun preloadRewarded() {
+        Log.d(TAG, "📢 Preloading rewarded ad...")
         val adRequest = AdRequest.Builder().build()
         RewardedAd.load(
             context,
@@ -64,10 +72,12 @@ class AdManager @Inject constructor(
             adRequest,
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
+                    Log.d(TAG, "✅ Rewarded ad loaded successfully")
                     rewardedAd = ad
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.e(TAG, "❌ Rewarded ad failed: ${error.message} (code: ${error.code})")
                     rewardedAd = null
                 }
             }
@@ -75,8 +85,12 @@ class AdManager @Inject constructor(
     }
 
     fun loadAppOpenAd() {
-        if (appOpenAd != null || isShowingAd) return
+        if (appOpenAd != null || isShowingAd) {
+            Log.d(TAG, "⏭️ Skipping app open ad load (already loaded or showing)")
+            return
+        }
 
+        Log.d(TAG, "📢 Loading app open ad...")
         val adRequest = AdRequest.Builder().build()
         AppOpenAd.load(
             context,
@@ -84,10 +98,12 @@ class AdManager @Inject constructor(
             adRequest,
             object : AppOpenAd.AppOpenAdLoadCallback() {
                 override fun onAdLoaded(ad: AppOpenAd) {
+                    Log.d(TAG, "✅ App open ad loaded successfully")
                     appOpenAd = ad
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.e(TAG, "❌ App open ad failed: ${error.message} (code: ${error.code})")
                     appOpenAd = null
                 }
             }
@@ -95,11 +111,18 @@ class AdManager @Inject constructor(
     }
 
     fun loadNativeAd() {
-        val adLoader = AdLoader.Builder(context, BuildConfig.ADMOB_BANNER_ID)
+        Log.d(TAG, "📢 Loading native ad...")
+        val adLoader = AdLoader.Builder(context, BuildConfig.ADMOB_NATIVE_ID)
             .forNativeAd { ad ->
+                Log.d(TAG, "✅ Native ad loaded successfully")
                 _nativeAd.value?.destroy()
                 _nativeAd.value = ad
             }
+            .withAdListener(object : com.google.android.gms.ads.AdListener() {
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    Log.e(TAG, "❌ Native ad failed: ${error.message} (code: ${error.code})")
+                }
+            })
             .withNativeAdOptions(
                 NativeAdOptions.Builder()
                     .setAdChoicesPlacement(NativeAdOptions.ADCHOICES_TOP_RIGHT)
