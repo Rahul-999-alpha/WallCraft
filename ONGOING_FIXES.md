@@ -1,8 +1,89 @@
 # ClearWalls - Ongoing Fixes & Testing Log
 
-## Current Version: v1.0.4 (released 2026-03-03)
-**Previous Release:** v1.0.3 (2026-03-03)
-**Release URL:** https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.4
+## Current Version: v1.0.5 (released 2026-03-03)
+**Previous Release:** v1.0.4 (2026-03-03)
+**Release URL:** https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.5
+
+---
+
+## Fixes Implemented in v1.0.5 (FreshWalls Decompilation Analysis)
+
+### 10. CRITICAL: Ad SDK Initialization Race Condition ✅ FIXED
+**File:** `ClearWallsApp.kt`
+
+**Root Cause (found by decompiling FreshWalls `com.techburner.freshwalls`):**
+`MobileAds.initialize(this)` is **asynchronous** - it returns immediately but the SDK isn't ready. Our code called `preloadInterstitial()`, `preloadRewarded()`, and `loadAppOpenAd()` BEFORE the SDK finished initializing. These calls silently failed every time.
+
+FreshWalls avoids this entirely by relying on `MobileAdsInitProvider` (ContentProvider auto-init) and never manually preloading.
+
+**Fix:**
+```kotlin
+// BEFORE (broken - ads loaded before SDK ready)
+MobileAds.initialize(this)
+adManager.preloadInterstitial()  // FAILS - SDK not ready
+adManager.preloadRewarded()      // FAILS - SDK not ready
+adManager.loadAppOpenAd()        // FAILS - SDK not ready
+
+// AFTER (fixed - ads loaded AFTER SDK initialization completes)
+MobileAds.initialize(this) { initializationStatus ->
+    // Log adapter statuses for debugging
+    for ((adapter, status) in initializationStatus.adapterStatusMap) {
+        Log.d(TAG, "Ad adapter: $adapter -> ${status.initializationState}")
+    }
+    adManager.preloadInterstitial()
+    adManager.preloadRewarded()
+    adManager.loadAppOpenAd()
+}
+```
+
+---
+
+### 11. CRITICAL: Missing gma_ad_services_config.xml ✅ FIXED
+**File:** `app/src/main/res/xml/gma_ad_services_config.xml` (NEW)
+
+**Root Cause:**
+AndroidManifest.xml referenced `@xml/gma_ad_services_config` but the file **never existed**. FreshWalls has this file. Without it, Android Privacy Sandbox / Ad Services integration fails.
+
+**Fix:** Created matching FreshWalls configuration:
+```xml
+<ad-services-config>
+    <attribution allowAllToAccess="true" />
+    <topics allowAllToAccess="true" />
+</ad-services-config>
+```
+
+---
+
+### 12. Banner Ad Size: Fixed → Adaptive ✅ FIXED
+**File:** `AdBanner.kt`
+
+**Issue:** Used fixed `AdSize.BANNER` (320x50). FreshWalls uses adaptive banners for better fill rates.
+
+**Fix:** Switched to `AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth)` which adapts to screen width.
+
+---
+
+### 13. Enhanced Ad Error Diagnostics ✅ IMPLEMENTED
+**Files:** `AdManager.kt`, `AdBanner.kt`
+
+All ad error callbacks now log: error code, message, domain, and cause. SDK initialization logs each adapter's status.
+
+**Monitor:**
+```bash
+adb logcat | grep -E "ClearWallsApp|AdManager|AdBanner"
+```
+
+---
+
+## FreshWalls vs ClearWalls - Full Comparison
+
+| Aspect | FreshWalls | ClearWalls (before) | ClearWalls (v1.0.5) |
+|--------|-----------|-------------------|-------------------|
+| **SDK Init** | Auto (MobileAdsInitProvider) | Manual + immediate preload (BROKEN) | Manual + callback (FIXED) |
+| **gma_ad_services_config.xml** | Present | MISSING | Present |
+| **ProGuard keep rules** | Has them | MISSING | Added in v1.0.4 |
+| **Banner size** | Adaptive | Fixed 320x50 | Adaptive |
+| **Ad error logging** | N/A (obfuscated) | Minimal | Comprehensive |
 
 ---
 
@@ -318,8 +399,8 @@ adb logcat | grep AdManager
 
 ### Version Info
 ```kotlin
-versionCode = 5
-versionName = "1.0.4"
+versionCode = 6
+versionName = "1.0.5"
 ```
 
 ### AdMob Configuration (local.properties)
@@ -383,6 +464,6 @@ As per plan file:
 ## Session Notes
 
 **Last Updated:** 2026-03-03
-**Status:** v1.0.4 released - ProGuard + API key fixes
+**Status:** v1.0.5 released - Ad system overhaul based on FreshWalls decompilation
 **Git Branch:** master
-**Latest Commit:** "v1.0.4 - Fix ads stripped by R8 + add API key validation & logging"
+**Latest Commit:** "v1.0.5 - Fix ad initialization timing + missing ad services config"
