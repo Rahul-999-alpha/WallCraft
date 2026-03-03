@@ -1,8 +1,81 @@
 # ClearWalls - Ongoing Fixes & Testing Log
 
-## Current Version: v1.0.3 (pending build)
-**Previous Release:** v1.0.2 (2026-03-02)
-**Release URL:** https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.2
+## Current Version: v1.0.4 (released 2026-03-03)
+**Previous Release:** v1.0.3 (2026-03-03)
+**Release URL:** https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.4
+
+---
+
+## Fixes Implemented in v1.0.4
+
+### 7. Critical Bug: Ads Stripped by R8/ProGuard in Release Builds ✅ FIXED
+**File:** `app/proguard-rules.pro`
+
+**Root Cause:**
+ProGuard rules were missing for Google Mobile Ads SDK. With `isMinifyEnabled = true` in release builds, R8 was stripping `com.google.android.gms.ads.**` classes, causing ALL ad types to silently fail in production.
+
+**Fix:**
+```proguard
+# Google Mobile Ads (AdMob)
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.ads.** { *; }
+-dontwarn com.google.android.gms.ads.**
+
+# Google Play Services
+-keep class com.google.android.gms.common.** { *; }
+-keep class com.google.android.gms.internal.** { *; }
+-dontwarn com.google.android.gms.internal.**
+```
+
+---
+
+### 8. Critical Bug: Placeholder API Keys Causing Silent Failures ✅ FIXED
+**Files:** All PagingSource files (`Pixabay`, `Wallhaven`, `Pexels`, `Unsplash`, `Freepik`, `Merged`)
+
+**Root Cause:**
+`local.properties` had placeholder keys like `your_pixabay_api_key_here` for Pixabay, Wallhaven, and Freepik. These are NOT blank strings, so the `isBlank()` checks didn't catch them. The placeholder keys were sent to APIs, causing HTTP 401 errors that were silently swallowed by `catch (_: Exception) { emptyList() }`.
+
+**Fix:**
+- Added `isValidApiKey()` helper that checks for both blank AND placeholder patterns
+- All PagingSource classes now skip gracefully when key is invalid
+- Added comprehensive logging to every PagingSource catch block
+
+```kotlin
+fun isValidApiKey(key: String): Boolean {
+    return key.isNotBlank() && !key.startsWith("your_") && !key.endsWith("_here")
+}
+```
+
+**Current API Key Status:**
+| Source | Key Status | Working? |
+|--------|-----------|----------|
+| Pexels | Real key | ✅ Yes |
+| Unsplash | Real key | ✅ Yes |
+| Pixabay | Placeholder | ❌ Needs real key |
+| Wallhaven | Placeholder | ❌ Needs real key |
+| Freepik | Placeholder | ❌ Needs real key |
+
+---
+
+### 9. Added Comprehensive Logging to All PagingSource Classes ✅ IMPLEMENTED
+**Files:** All 6 PagingSource files
+
+**What's logged:**
+- Per-source wallpaper load counts (e.g., "Pexels: loaded 8 wallpapers")
+- Skipped sources with reason (e.g., "Pixabay: skipped (invalid/placeholder API key)")
+- Error details (e.g., "Wallhaven: failed - HTTP 401 Unauthorized")
+- Merged total count per page
+
+**Monitor command:**
+```bash
+adb logcat | grep -E "MergedPaging|PixabayPaging|WallhavenPaging|PexelsPaging|UnsplashPaging|FreepikPaging"
+```
+
+---
+
+## Fixes Implemented in v1.0.3
+
+### (Previously items 4-6, now in production)
 
 ---
 
@@ -245,8 +318,8 @@ adb logcat | grep AdManager
 
 ### Version Info
 ```kotlin
-versionCode = 3
-versionName = "1.0.2"
+versionCode = 5
+versionName = "1.0.4"
 ```
 
 ### AdMob Configuration (local.properties)
@@ -309,7 +382,7 @@ As per plan file:
 
 ## Session Notes
 
-**Last Updated:** 2026-03-02
-**Status:** Waiting for v1.0.2 testing feedback
+**Last Updated:** 2026-03-03
+**Status:** v1.0.4 released - ProGuard + API key fixes
 **Git Branch:** master
-**Latest Commit:** "Fix hardcoded version in Settings - use BuildConfig.VERSION_NAME"
+**Latest Commit:** "v1.0.4 - Fix ads stripped by R8 + add API key validation & logging"
