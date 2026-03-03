@@ -1,5 +1,6 @@
 package com.rahul.clearwalls.data.paging
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.rahul.clearwalls.BuildConfig
@@ -22,18 +23,25 @@ class WallhavenPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Wallpaper> {
         val page = params.key ?: 1
         return try {
+            val apiKey = BuildConfig.WALLHAVEN_API_KEY
+            if (!MergedWallpaperPagingSource.isValidApiKey(apiKey)) {
+                Log.w("WallhavenPaging", "Skipped: invalid/placeholder API key")
+                return LoadResult.Page(emptyList(), null, null)
+            }
             val response = api.searchWallpapers(
-                apiKey = BuildConfig.WALLHAVEN_API_KEY,
+                apiKey = apiKey,
                 query = query,
                 page = page
             )
             val wallpapers = response.data.map { it.toWallpaper() }
+            Log.d("WallhavenPaging", "Loaded ${wallpapers.size} wallpapers (page $page)")
             LoadResult.Page(
                 data = wallpapers,
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = if (page >= response.meta.lastPage) null else page + 1
             )
         } catch (e: Exception) {
+            Log.e("WallhavenPaging", "Failed: ${e.message}")
             LoadResult.Error(e)
         }
     }

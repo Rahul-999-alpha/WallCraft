@@ -33,3 +33,13 @@
 -keep class dagger.hilt.** { *; }
 -keep class javax.inject.** { *; }
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
+
+# Google Mobile Ads (AdMob)
+-keep class com.google.android.gms.ads.** { *; }
+-keep class com.google.ads.** { *; }
+-dontwarn com.google.android.gms.ads.**
+
+# Google Play Services
+-keep class com.google.android.gms.common.** { *; }
+-keep class com.google.android.gms.internal.** { *; }
+-dontwarn com.google.android.gms.internal.**

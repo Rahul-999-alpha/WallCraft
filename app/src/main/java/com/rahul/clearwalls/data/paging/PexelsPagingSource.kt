@@ -1,5 +1,6 @@
 package com.rahul.clearwalls.data.paging
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.rahul.clearwalls.BuildConfig
@@ -24,7 +25,10 @@ class PexelsPagingSource(
         val page = params.key ?: 1
         return try {
             val apiKey = BuildConfig.PEXELS_API_KEY
-            if (apiKey.isBlank()) return LoadResult.Page(emptyList(), null, null)
+            if (!MergedWallpaperPagingSource.isValidApiKey(apiKey)) {
+                Log.w("PexelsPaging", "Skipped: invalid/placeholder API key")
+                return LoadResult.Page(emptyList(), null, null)
+            }
 
             val response = if (curated) {
                 api.getCurated(apiKey = apiKey, page = page, perPage = params.loadSize.coerceAtMost(80))
@@ -32,12 +36,14 @@ class PexelsPagingSource(
                 api.searchPhotos(apiKey = apiKey, query = query, page = page, perPage = params.loadSize.coerceAtMost(80))
             }
             val wallpapers = response.photos.map { it.toWallpaper() }
+            Log.d("PexelsPaging", "Loaded ${wallpapers.size} wallpapers (page $page)")
             LoadResult.Page(
                 data = wallpapers,
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = if (wallpapers.isEmpty()) null else page + 1
             )
         } catch (e: Exception) {
+            Log.e("PexelsPaging", "Failed: ${e.message}")
             LoadResult.Error(e)
         }
     }
