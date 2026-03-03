@@ -37,8 +37,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.rahul.clearwalls.domain.model.Wallpaper
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.presentation.components.AdBanner
 import com.rahul.clearwalls.presentation.components.CategoryChip
+import com.rahul.clearwalls.presentation.components.NativeAdCard
 import com.rahul.clearwalls.presentation.components.SectionHeader
 import com.rahul.clearwalls.presentation.components.WallpaperCard
 import java.util.Calendar
@@ -142,7 +145,12 @@ fun HomeScreen(
             // For You section header
             SectionHeader(title = "For You")
 
-            // Wallpaper grid
+            // Wallpaper grid with inline native ads
+            val adInterval = Constants.AD_INLINE_INTERVAL
+            val wpCount = wallpapers.itemCount
+            val numAds = if (wpCount > adInterval) wpCount / adInterval else 0
+            val totalItems = wpCount + numAds
+
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),
                 contentPadding = PaddingValues(8.dp),
@@ -150,16 +158,45 @@ fun HomeScreen(
                 verticalItemSpacing = 8.dp,
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(wallpapers.itemCount) { index ->
-                    wallpapers[index]?.let { wallpaper ->
-                        WallpaperCard(
-                            wallpaper = wallpaper,
-                            onClick = { onWallpaperClick(wallpaper) },
-                            onFavoriteClick = { viewModel.toggleFavorite(it) }
+                items(
+                    count = totalItems,
+                    span = { index ->
+                        if (isNativeAdPosition(index, adInterval)) {
+                            StaggeredGridItemSpan.FullLine
+                        } else {
+                            StaggeredGridItemSpan.SingleLane
+                        }
+                    }
+                ) { index ->
+                    if (isNativeAdPosition(index, adInterval)) {
+                        NativeAdCard(
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
+                    } else {
+                        val wpIndex = toWallpaperIndex(index, adInterval)
+                        if (wpIndex < wpCount) {
+                            wallpapers[wpIndex]?.let { wallpaper ->
+                                WallpaperCard(
+                                    wallpaper = wallpaper,
+                                    onClick = { onWallpaperClick(wallpaper) },
+                                    onFavoriteClick = { viewModel.toggleFavorite(it) }
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun isNativeAdPosition(index: Int, adInterval: Int): Boolean {
+    if (index < adInterval) return false
+    return (index - adInterval) % (adInterval + 1) == 0
+}
+
+private fun toWallpaperIndex(index: Int, adInterval: Int): Int {
+    if (index < adInterval) return index
+    val adsShown = (index - adInterval) / (adInterval + 1) + 1
+    return index - adsShown
 }

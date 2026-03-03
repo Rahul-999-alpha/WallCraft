@@ -37,6 +37,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,8 +54,10 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.rahul.clearwalls.ClearWallsApp
 import com.rahul.clearwalls.domain.model.WallpaperSource
 import com.rahul.clearwalls.domain.usecase.WallpaperTarget
 import com.rahul.clearwalls.presentation.components.AttributionBadge
@@ -70,6 +73,10 @@ fun WallpaperDetailScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val adManager = remember {
+        (context.applicationContext as? ClearWallsApp)?.adManager
+    }
 
     var showSetSheet by remember { mutableStateOf(false) }
     var showQualityPicker by remember { mutableStateOf(false) }
@@ -83,6 +90,11 @@ fun WallpaperDetailScreen(
                 is DetailEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message)
                 is DetailEvent.WallpaperSet -> showSetSheet = false
                 is DetailEvent.WallpaperDownloaded -> showQualityPicker = false
+                is DetailEvent.ShowInterstitial -> {
+                    (context as? Activity)?.let { activity ->
+                        adManager?.showInterstitial(activity)
+                    }
+                }
             }
         }
     }

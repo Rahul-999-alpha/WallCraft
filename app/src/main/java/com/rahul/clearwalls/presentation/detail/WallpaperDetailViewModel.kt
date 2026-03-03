@@ -11,6 +11,8 @@ import com.rahul.clearwalls.domain.usecase.DownloadWallpaperUseCase
 import com.rahul.clearwalls.domain.usecase.SetWallpaperUseCase
 import com.rahul.clearwalls.domain.usecase.ToggleFavoriteUseCase
 import com.rahul.clearwalls.domain.usecase.WallpaperTarget
+import android.util.Log
+import com.rahul.clearwalls.core.util.AdManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,7 @@ sealed class DetailEvent {
     data class ShowMessage(val message: String) : DetailEvent()
     data object WallpaperSet : DetailEvent()
     data object WallpaperDownloaded : DetailEvent()
+    data object ShowInterstitial : DetailEvent()
 }
 
 @HiltViewModel
@@ -34,8 +37,15 @@ class WallpaperDetailViewModel @Inject constructor(
     private val favoriteRepository: FavoriteRepository,
     private val setWallpaperUseCase: SetWallpaperUseCase,
     private val downloadWallpaperUseCase: DownloadWallpaperUseCase,
-    private val toggleFavoriteUseCase: ToggleFavoriteUseCase
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
+    private val adManager: AdManager
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "WallpaperDetailVM"
+        // In-memory cache set before navigation for fast wallpaper data transfer
+        var pendingWallpaper: Wallpaper? = null
+    }
 
     private val wallpaperId: String = savedStateHandle.get<String>("wallpaperId") ?: ""
 
@@ -57,14 +67,27 @@ class WallpaperDetailViewModel @Inject constructor(
 
     private fun loadWallpaper() {
         viewModelScope.launch {
-            _isFavorite.value = favoriteRepository.isFavorite(wallpaperId)
-        }
-    }
+            // 1. Fast path: use pending wallpaper from navigation cache
+            val pending = pendingWallpaper
+            if (pending != null && pending.id == wallpaperId) {
+                _wallpaper.value = pending
+                pendingWallpaper = null
+                Log.d(TAG, "Loaded wallpaper from navigation cache: ${pending.id}")
+            } else {
+                // 2. Fallback: load from database (cached wallpapers or favorites)
+                Log.d(TAG, "Loading wallpaper from database: $wallpaperId")
+                val dbWallpaper = wallpaperRepository.getWallpaperById(wallpaperId)
+                if (dbWallpaper != null) {
+                    _wallpaper.value = dbWallpaper
+                    Log.d(TAG, "Loaded wallpaper from database: ${dbWallpaper.id}")
+                } else {
+                    Log.e(TAG, "Failed to load wallpaper: $wallpaperId - not found in cache or database")
+                    _events.emit(DetailEvent.ShowMessage("Failed to load wallpaper data"))
+                }
+            }
 
-    fun setWallpaperData(wallpaper: Wallpaper) {
-        _wallpaper.value = wallpaper
-        viewModelScope.launch {
-            _isFavorite.value = favoriteRepository.isFavorite(wallpaper.id)
+            // Check favorite status
+            _isFavorite.value = favoriteRepository.isFavorite(wallpaperId)
         }
     }
 
@@ -76,6 +99,9 @@ class WallpaperDetailViewModel @Inject constructor(
                 .onSuccess {
                     _events.emit(DetailEvent.WallpaperSet)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper set successfully!"))
+                    if (adManager.shouldShowInterstitialOnSet()) {
+                        _events.emit(DetailEvent.ShowInterstitial)
+                    }
                 }
                 .onFailure {
                     _events.emit(DetailEvent.ShowMessage("Failed to set wallpaper: ${it.message}"))
@@ -98,6 +124,9 @@ class WallpaperDetailViewModel @Inject constructor(
                 .onSuccess {
                     _events.emit(DetailEvent.WallpaperDownloaded)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper saved to gallery!"))
+                    if (adManager.shouldShowInterstitialOnDownload()) {
+                        _events.emit(DetailEvent.ShowInterstitial)
+                    }
                 }
                 .onFailure {
                     _events.emit(DetailEvent.ShowMessage("Failed to download: ${it.message}"))

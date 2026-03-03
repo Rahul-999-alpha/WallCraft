@@ -3,6 +3,9 @@ package com.rahul.clearwalls.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.rahul.clearwalls.data.local.dao.CachedWallpaperDao
+import com.rahul.clearwalls.data.local.dao.FavoriteDao
+import com.rahul.clearwalls.data.mapper.toWallpaper
 import com.rahul.clearwalls.data.paging.MergedWallpaperPagingSource
 import com.rahul.clearwalls.data.paging.PexelsPagingSource
 import com.rahul.clearwalls.data.paging.PixabayPagingSource
@@ -27,7 +30,9 @@ class WallpaperRepositoryImpl @Inject constructor(
     private val wallhavenApi: WallhavenApi,
     private val pexelsApi: PexelsApi,
     private val unsplashApi: UnsplashApi,
-    private val freepikApi: FreepikApi
+    private val freepikApi: FreepikApi,
+    private val cachedWallpaperDao: CachedWallpaperDao,
+    private val favoriteDao: FavoriteDao
 ) : WallpaperRepository {
 
     companion object {
@@ -101,5 +106,11 @@ class WallpaperRepositoryImpl @Inject constructor(
         Category("texture", "texture pattern", "Texture")
     )
 
-    override suspend fun getWallpaperById(id: String): Wallpaper? = null
+    override suspend fun getWallpaperById(id: String): Wallpaper? {
+        // Check cached wallpapers first (has all quality URLs)
+        cachedWallpaperDao.getById(id)?.let { return it.toWallpaper() }
+        // Fallback to favorites table
+        favoriteDao.getById(id)?.let { return it.toWallpaper() }
+        return null
+    }
 }

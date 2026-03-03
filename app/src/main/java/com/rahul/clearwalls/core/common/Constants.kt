@@ -20,7 +20,7 @@ object Constants {
 
     const val AD_INTERSTITIAL_COOLDOWN_MS = 60_000L
     const val AD_FIRST_SESSION_GRACE_MS = 300_000L // 5 min
-    const val AD_INLINE_INTERVAL = 12
+    const val AD_INLINE_INTERVAL = 8
     const val AD_INTERSTITIAL_SET_INTERVAL = 5
     const val AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 3
 

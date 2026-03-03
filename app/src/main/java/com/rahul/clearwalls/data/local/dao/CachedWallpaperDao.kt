@@ -11,6 +11,9 @@ interface CachedWallpaperDao {
     @Query("SELECT * FROM cached_wallpapers ORDER BY cachedAt DESC")
     suspend fun getAllCached(): List<CachedWallpaperEntity>
 
+    @Query("SELECT * FROM cached_wallpapers WHERE id = :id LIMIT 1")
+    suspend fun getById(id: String): CachedWallpaperEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(wallpapers: List<CachedWallpaperEntity>)
 

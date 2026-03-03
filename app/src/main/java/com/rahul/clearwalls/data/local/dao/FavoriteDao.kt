@@ -16,6 +16,9 @@ interface FavoriteDao {
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE wallpaperId = :id)")
     suspend fun isFavorite(id: String): Boolean
 
+    @Query("SELECT * FROM favorites WHERE wallpaperId = :id LIMIT 1")
+    suspend fun getById(id: String): FavoriteEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(favorite: FavoriteEntity)
 

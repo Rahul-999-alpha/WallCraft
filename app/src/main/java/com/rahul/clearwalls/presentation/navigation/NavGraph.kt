@@ -15,6 +15,7 @@ import com.rahul.clearwalls.presentation.admin.AdminScreen
 import com.rahul.clearwalls.presentation.aigenerate.AiGenerateScreen
 import com.rahul.clearwalls.presentation.browse.BrowseScreen
 import com.rahul.clearwalls.presentation.detail.WallpaperDetailScreen
+import com.rahul.clearwalls.presentation.detail.WallpaperDetailViewModel
 import com.rahul.clearwalls.presentation.favorites.FavoritesScreen
 import com.rahul.clearwalls.presentation.home.HomeScreen
 import com.rahul.clearwalls.presentation.onboarding.OnboardingScreen
@@ -63,6 +64,7 @@ fun NavGraph(
         composable(Screen.Home.route) {
             HomeScreen(
                 onWallpaperClick = { wallpaper ->
+                    WallpaperDetailViewModel.pendingWallpaper = wallpaper
                     navController.navigate(Screen.Detail.createRoute(wallpaper.id))
                 },
                 onCategoryClick = { category ->
@@ -89,6 +91,7 @@ fun NavGraph(
         ) {
             BrowseScreen(
                 onWallpaperClick = { wallpaper ->
+                    WallpaperDetailViewModel.pendingWallpaper = wallpaper
                     navController.navigate(Screen.Detail.createRoute(wallpaper.id))
                 },
                 onBackClick = { navController.popBackStack() }
@@ -98,6 +101,7 @@ fun NavGraph(
         composable(Screen.Search.route) {
             SearchScreen(
                 onWallpaperClick = { wallpaper ->
+                    WallpaperDetailViewModel.pendingWallpaper = wallpaper
                     navController.navigate(Screen.Detail.createRoute(wallpaper.id))
                 },
                 onBackClick = { navController.popBackStack() }
@@ -118,6 +122,7 @@ fun NavGraph(
         composable(Screen.AiGenerate.route) {
             AiGenerateScreen(
                 onWallpaperClick = { wallpaper ->
+                    WallpaperDetailViewModel.pendingWallpaper = wallpaper
                     navController.navigate(Screen.Detail.createRoute(wallpaper.id))
                 }
             )
@@ -126,6 +131,7 @@ fun NavGraph(
         composable(Screen.Favorites.route) {
             FavoritesScreen(
                 onWallpaperClick = { wallpaper ->
+                    WallpaperDetailViewModel.pendingWallpaper = wallpaper
                     navController.navigate(Screen.Detail.createRoute(wallpaper.id))
                 }
             )
