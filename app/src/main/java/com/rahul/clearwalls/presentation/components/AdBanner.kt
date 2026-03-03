@@ -2,10 +2,8 @@ package com.rahul.clearwalls.presentation.components
 
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -21,7 +19,10 @@ fun AdBanner(
     AndroidView(
         factory = { context ->
             AdView(context).apply {
-                setAdSize(AdSize.BANNER)
+                // Use adaptive banner for better fill rate (matches FreshWalls approach)
+                val displayMetrics = context.resources.displayMetrics
+                val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+                setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth))
                 adUnitId = BuildConfig.ADMOB_BANNER_ID
 
                 adListener = object : AdListener() {
@@ -30,7 +31,7 @@ fun AdBanner(
                     }
 
                     override fun onAdFailedToLoad(error: LoadAdError) {
-                        Log.e("AdBanner", "Banner ad failed to load: ${error.message} (code: ${error.code})")
+                        Log.e("AdBanner", "Banner ad FAILED: code=${error.code}, message=${error.message}, domain=${error.domain}, cause=${error.cause}")
                     }
 
                     override fun onAdOpened() {
@@ -46,8 +47,6 @@ fun AdBanner(
                 Log.d("AdBanner", "Banner ad requested with unit ID: $adUnitId")
             }
         },
-        modifier = modifier
-            .fillMaxWidth()
-            .height(50.dp)
+        modifier = modifier.fillMaxWidth()
     )
 }

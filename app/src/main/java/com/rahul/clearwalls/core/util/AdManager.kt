@@ -56,7 +56,7 @@ class AdManager @Inject constructor(
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    Log.e(TAG, "❌ Interstitial ad failed: ${error.message} (code: ${error.code})")
+                    Log.e(TAG, "❌ Interstitial ad FAILED: code=${error.code}, message=${error.message}, domain=${error.domain}, cause=${error.cause}")
                     interstitialAd = null
                 }
             }
@@ -77,7 +77,7 @@ class AdManager @Inject constructor(
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    Log.e(TAG, "❌ Rewarded ad failed: ${error.message} (code: ${error.code})")
+                    Log.e(TAG, "❌ Rewarded ad FAILED: code=${error.code}, message=${error.message}, domain=${error.domain}, cause=${error.cause}")
                     rewardedAd = null
                 }
             }
@@ -103,7 +103,7 @@ class AdManager @Inject constructor(
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    Log.e(TAG, "❌ App open ad failed: ${error.message} (code: ${error.code})")
+                    Log.e(TAG, "❌ App open ad FAILED: code=${error.code}, message=${error.message}, domain=${error.domain}, cause=${error.cause}")
                     appOpenAd = null
                 }
             }
@@ -120,7 +120,7 @@ class AdManager @Inject constructor(
             }
             .withAdListener(object : com.google.android.gms.ads.AdListener() {
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    Log.e(TAG, "❌ Native ad failed: ${error.message} (code: ${error.code})")
+                    Log.e(TAG, "❌ Native ad FAILED: code=${error.code}, message=${error.message}, domain=${error.domain}, cause=${error.cause}")
                 }
             })
             .withNativeAdOptions(
@@ -151,6 +151,7 @@ class AdManager @Inject constructor(
     }
 
     fun showInterstitial(activity: Activity, onDismissed: () -> Unit = {}) {
+        Log.d(TAG, "showInterstitial called, ad loaded: ${interstitialAd != null}")
         val ad = interstitialAd
         if (ad != null) {
             ad.fullScreenContentCallback = object : com.google.android.gms.ads.FullScreenContentCallback() {
@@ -169,6 +170,7 @@ class AdManager @Inject constructor(
     }
 
     fun showRewarded(activity: Activity, onRewarded: () -> Unit, onFailed: () -> Unit = {}) {
+        Log.d(TAG, "showRewarded called, ad loaded: ${rewardedAd != null}")
         val ad = rewardedAd
         if (ad != null) {
             ad.show(activity) { _ ->

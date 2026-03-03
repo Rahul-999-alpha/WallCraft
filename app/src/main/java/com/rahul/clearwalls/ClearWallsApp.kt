@@ -3,6 +3,7 @@ package com.rahul.clearwalls
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -24,6 +25,10 @@ import javax.inject.Inject
 @HiltAndroidApp
 class ClearWallsApp : Application(), Configuration.Provider, Application.ActivityLifecycleCallbacks {
 
+    companion object {
+        private const val TAG = "ClearWallsApp"
+    }
+
     @Inject lateinit var adManager: AdManager
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
@@ -32,10 +37,21 @@ class ClearWallsApp : Application(), Configuration.Provider, Application.Activit
     override fun onCreate() {
         super.onCreate()
         registerActivityLifecycleCallbacks(this)
-        MobileAds.initialize(this)
-        adManager.preloadInterstitial()
-        adManager.preloadRewarded()
-        adManager.loadAppOpenAd()
+
+        // Initialize Mobile Ads SDK and wait for completion before loading ads
+        Log.d(TAG, "Initializing Mobile Ads SDK...")
+        MobileAds.initialize(this) { initializationStatus ->
+            val statusMap = initializationStatus.adapterStatusMap
+            for ((adapter, status) in statusMap) {
+                Log.d(TAG, "Ad adapter: $adapter -> ${status.initializationState} (${status.description})")
+            }
+            Log.d(TAG, "Mobile Ads SDK initialized - now preloading ads")
+            // Only preload ads AFTER SDK initialization completes
+            adManager.preloadInterstitial()
+            adManager.preloadRewarded()
+            adManager.loadAppOpenAd()
+        }
+
         scheduleWallpaperRefresh()
         setupAppOpenAds()
     }
