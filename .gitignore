@@ -13,3 +13,13 @@ google-services.json
 *.keystore
 app/release/
 app/debug/
+app/build/
+
+# APK build artifacts
+*.apk
+*.idsig
+*.aab
+
+# Competitor analysis downloads
+*.xapk
+uptodown-*.zip
