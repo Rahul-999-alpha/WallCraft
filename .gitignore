@@ -20,6 +20,7 @@ app/build/
 *.idsig
 *.aab
 
-# Competitor analysis downloads
+# Competitor analysis downloads and decompiled files
 *.xapk
 uptodown-*.zip
+competitor-analysis/
