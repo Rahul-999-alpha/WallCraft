@@ -3,49 +3,41 @@
 <div align="center">
   <img src="Clear walls A1.png" alt="ClearWalls Logo" width="200"/>
 
-  [![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)](https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.2)
+  [![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/Rahul-999-alpha/WallCraft/releases)
   [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
   [![Android](https://img.shields.io/badge/Android-26%2B-brightgreen.svg)](https://developer.android.com)
   [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple.svg)](https://kotlinlang.org)
 </div>
 
-## 📱 Overview
+## Overview
 
-ClearWalls is a modern Android wallpaper application that combines curated wallpapers from multiple sources with AI-powered wallpaper generation. Built with Jetpack Compose and Material 3, it offers a clean, minimal, and elegant user experience.
+ClearWalls is a modern Android wallpaper app that combines curated wallpapers from Pexels and Unsplash with AI-powered wallpaper generation via Stability AI. Built with Jetpack Compose and Material 3.
 
-### ✨ Key Features
+### Key Features
 
-- 🎨 **Multi-Source Wallpapers** - Browse wallpapers from Pixabay and Wallhaven
-- 🤖 **AI Generation** - Create custom wallpapers using Stability AI
-- 📱 **Quality Options** - Download in multiple resolutions (480p, 1080p, 2K, 4K)
-- ❤️ **Favorites** - Save and organize your favorite wallpapers
-- 🔍 **Smart Search** - Find wallpapers by keywords with debounced search
-- 🎭 **Theme Modes** - Light, Dark, AMOLED (pure black), and System themes
-- 📂 **Category Browse** - Explore curated categories (Nature, Abstract, Space, etc.)
-- ⚡ **Auto Wallpaper Changer** - Automatically rotate wallpapers at set intervals
-- 🎯 **Set Wallpaper** - Apply to home screen, lock screen, or both
-- 💾 **Offline Support** - Access favorites without internet
-
-### 🎯 Upcoming Features (Phase 2)
-
-- 📸 Pexels, Unsplash, Pinterest, Freepik integration
-- 🖼️ Native ad cards in grid
-- 🔄 Auto-refresh with WorkManager
-- 🔧 Hidden admin panel for configuration
-- 📊 Enhanced analytics
+- **Multi-Source Wallpapers** - Browse wallpapers from Pexels and Unsplash
+- **AI Generation** - Create custom wallpapers using Stability AI (SDXL)
+- **Quality Options** - Download in multiple resolutions (480p, 1080p, 2K, 4K)
+- **Favorites** - Save and organize wallpapers for offline access
+- **Smart Search** - Debounced keyword search across all sources
+- **Theme Modes** - Light, Dark, AMOLED (pure black), and System themes
+- **Category Browse** - Explore curated categories (Nature, Abstract, Space, etc.)
+- **Auto Wallpaper Changer** - Rotate wallpapers at set intervals via WorkManager
+- **Set Wallpaper** - Apply to home screen, lock screen, or both
+- **Native Ad Cards** - Non-intrusive ads integrated into the wallpaper grid
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
-ClearWalls follows **Clean Architecture** principles with clear separation of concerns:
+ClearWalls follows **Clean Architecture** with MVVM:
 
 ```
 app/
 ├── core/
 │   ├── common/          # Constants, sealed classes
-│   ├── util/            # Utilities (AdManager, Extensions)
-│   └── di/              # Dependency Injection (Hilt modules)
+│   ├── util/            # AdManager, Extensions
+│   └── di/              # Hilt DI modules
 ├── data/
 │   ├── local/           # Room database (entities, DAOs)
 │   ├── remote/          # API interfaces and DTOs
@@ -56,63 +48,38 @@ app/
 │   ├── model/           # Domain models
 │   ├── repository/      # Repository interfaces
 │   └── usecase/         # Business logic use cases
+├── worker/              # WorkManager jobs
 └── presentation/
-    ├── components/      # Reusable UI components
+    ├── components/      # Reusable UI components (NativeAdCard, etc.)
     ├── navigation/      # Navigation setup
     ├── theme/           # Theme configuration
     └── [screens]/       # Feature screens with ViewModels
 ```
 
-### 🛠️ Tech Stack
+### Tech Stack
 
-**Core:**
-- Kotlin 1.9
-- Android SDK 26+ (Target: 35)
-- Jetpack Compose (BOM 2024.12.01)
-- Material 3
-
-**Architecture & DI:**
-- MVVM Pattern
-- Hilt (Dependency Injection)
-- Coroutines & Flow
-- StateFlow & SharedFlow
-
-**Networking & Data:**
-- Retrofit 2.11
-- OkHttp 4.12 (with caching)
-- Gson
-- Room 2.6.1
-- DataStore Preferences
-- Paging 3
-
-**Image Loading:**
-- Coil 3.0.4 (Compose + OkHttp integration)
-
-**Firebase:**
-- Firestore (curated wallpapers)
-- Storage (image hosting)
-- Remote Config
-- Crashlytics
-- Analytics
-
-**Monetization:**
-- Google AdMob (Banner, Interstitial, Rewarded, Native, App Open)
-
-**Background Work:**
-- WorkManager 2.10.0 (auto wallpaper changer)
+| Category | Libraries |
+|----------|-----------|
+| **Core** | Kotlin 1.9, Android SDK 26+ (target 35), Jetpack Compose (BOM 2024.12.01), Material 3 |
+| **Architecture** | MVVM, Hilt DI, Coroutines & Flow, StateFlow |
+| **Networking** | Retrofit 2.11, OkHttp 4.12 (with caching), Gson |
+| **Data** | Room 2.6.1, DataStore Preferences, Paging 3 |
+| **Images** | Coil 3.0.4 (Compose + OkHttp) |
+| **Firebase** | Crashlytics, Analytics, Remote Config, Firestore, Storage |
+| **Ads** | Google AdMob (Banner, Interstitial, Rewarded, Native, App Open) |
+| **Background** | WorkManager 2.10.0 |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Android Studio Hedgehog (2023.1.1) or later
 - JDK 17
 - Android SDK 35
-- Gradle 8.x
 
-### Installation
+### Setup
 
 1. **Clone the repository:**
    ```bash
@@ -120,70 +87,134 @@ app/
    cd WallCraft
    ```
 
-2. **Create `local.properties` in the project root:**
-   ```properties
-   # API Keys
-   PIXABAY_API_KEY=your_pixabay_key
-   WALLHAVEN_API_KEY=your_wallhaven_key
-   STABILITY_AI_API_KEY=your_stability_ai_key
-
-   # AdMob IDs (Production)
-   ADMOB_APP_ID=ca-app-pub-xxxxx~xxxxxxxx
-   ADMOB_BANNER_ID=ca-app-pub-xxxxx/xxxxxxxx
-   ADMOB_INTERSTITIAL_ID=ca-app-pub-xxxxx/xxxxxxxx
-   ADMOB_REWARDED_ID=ca-app-pub-xxxxx/xxxxxxxx
-   ADMOB_NATIVE_ID=ca-app-pub-xxxxx/xxxxxxxx
-   ADMOB_APP_OPEN_ID=ca-app-pub-xxxxx/xxxxxxxx
-
-   # Future APIs (Phase 2)
-   PEXELS_API_KEY=your_pexels_key
-   UNSPLASH_ACCESS_KEY=your_unsplash_key
-   PINTEREST_ACCESS_TOKEN=your_pinterest_token
-   FREEPIK_API_KEY=your_freepik_key
+2. **Create `local.properties`** (copy from template):
+   ```bash
+   cp local.properties.template local.properties
    ```
+   Then fill in your real API keys. See the template for details.
+
+   **Required keys:**
+   - `PEXELS_API_KEY` - from [pexels.com/api](https://www.pexels.com/api/)
+   - `UNSPLASH_ACCESS_KEY` - from [unsplash.com/developers](https://unsplash.com/developers)
+   - `ADMOB_APP_ID` + 5 ad unit IDs - from [AdMob console](https://admob.google.com)
+
+   **Optional:**
+   - `STABILITY_AI_API_KEY` - from [platform.stability.ai](https://platform.stability.ai/) (powers AI Create tab; shows error message if missing)
 
 3. **Add `google-services.json`:**
    - Download from Firebase Console
    - Place in `app/` directory
 
-4. **Sync project with Gradle:**
+4. **Release keystore** (for release builds):
    ```bash
-   ./gradlew sync
+   keytool -genkeypair -v -keystore keystore/clearwalls.jks \
+     -keyalg RSA -keysize 2048 -validity 10000 -alias clearwalls
+   ```
+   Then add to `local.properties`:
+   ```properties
+   KEY_STORE_PATH=../keystore/clearwalls.jks
+   KEY_STORE_PASS=your_password
+   KEY_ALIAS=clearwalls
+   KEY_PASS=your_password
    ```
 
-5. **Build and run:**
+5. **Build:**
    ```bash
-   # Debug build (uses Google test ad IDs)
-   ./gradlew assembleDebug
-
-   # Release build (uses production ad IDs)
-   ./gradlew assembleRelease
+   ./gradlew assembleDebug      # Debug APK (~29 MB)
+   ./gradlew assembleRelease    # Release APK (~7 MB, R8 minified + signed)
    ```
 
 ---
 
-## 📦 Build Variants
+## Build Variants
 
 ### Debug
-- App ID: `com.rahul.clearwalls.debug`
-- Uses Google AdMob test ad unit IDs
-- Debuggable enabled
-- No obfuscation
+- **App ID:** `com.rahul.clearwalls.debug`
+- Uses real AdMob IDs from `local.properties` (same as release)
+- Debuggable, no obfuscation
 
 ### Release
-- App ID: `com.rahul.clearwalls`
-- Uses production ad unit IDs from `local.properties`
-- Minification enabled (R8)
-- ProGuard rules applied
-- Requires signing configuration
+- **App ID:** `com.rahul.clearwalls`
+- `requireKey()` validates all AdMob IDs and content API keys at Gradle configuration time
+- R8 minification + resource shrinking enabled
+- ProGuard rules for AdMob, Retrofit, Gson, Coil, Room
+- Requires signing configuration in `local.properties`
 
 ---
 
-## 🎨 Design System
+## API Integrations
 
-### Color Palette
-Inspired by the logo - purple gradient mountains with warm sunset tones:
+### Active Sources
+| Source | Purpose | Key Required |
+|--------|---------|-------------|
+| **Pexels** | Curated + search wallpapers | Yes |
+| **Unsplash** | Search wallpapers | Yes |
+| **Stability AI** | AI wallpaper generation (SDXL) | Optional |
 
+### Disabled Sources (code preserved, not wired)
+Pixabay, Wallhaven, Pinterest, and Freepik source files exist in `data/paging/` and `data/remote/` but are disconnected from the DI graph. To re-enable: uncomment providers in `NetworkModule.kt`, add keys to `local.properties`, and wire into `MergedWallpaperPagingSource`.
+
+### Firebase
+- **Firestore** - Curated wallpaper metadata
+- **Storage** - Hosted wallpaper images
+- **Remote Config** - Feature flags
+- **Crashlytics** - Crash reporting
+- **Analytics** - Usage tracking
+
+---
+
+## Ad Integration
+
+ClearWalls uses Google AdMob with 5 ad formats. Both debug and release builds use production ad IDs.
+
+| Ad Type | Placement | Frequency |
+|---------|-----------|-----------|
+| **Banner** | Bottom of Home/Browse/Favorites | Persistent (adaptive width) |
+| **Interstitial** | After wallpaper actions | Every 3rd download / 5th set, 1-min cooldown |
+| **Rewarded** | AI Generate (credits depleted) | On-demand |
+| **Native** | Wallpaper grid | Every 8 items (full-width card) |
+| **App Open** | App resume from background | 4-hour cooldown, 5-min first-session grace |
+
+### Ad System Architecture
+- `AdManager.kt` - Singleton managing all ad lifecycle (load, show, preload)
+- `ClearWallsApp.kt` - Initializes MobileAds SDK, preloads ads in init callback
+- `AdBanner.kt` - Composable adaptive banner component
+- `NativeAdCard.kt` - Composable native ad card for grid integration
+
+### Monitoring
+```bash
+adb logcat | grep -E "AdManager|AdBanner|ClearWallsApp|NATIVE"
+```
+
+---
+
+## Screens
+
+1. **Onboarding** - First-time user introduction (3 pages)
+2. **Home** - Categories, search, wallpaper grid with native ad cards
+3. **Browse** - Category-filtered wallpaper grid
+4. **Favorites** - Saved wallpapers (offline access)
+5. **AI Generate** - Stability AI wallpaper generation with rewarded ads
+6. **Wallpaper Detail** - Preview, zoom, download, set, share
+7. **Settings** - Theme, image quality, data saver, auto wallpaper
+8. **Admin Panel** - Hidden configuration (7 taps on logo + password)
+
+---
+
+## Performance
+
+- **Image Cache:** 250 MB Coil disk cache
+- **HTTP Cache:** 50 MB OkHttp cache
+- **Paging:** 20 items per page with 5-item prefetch distance
+- **Search:** 500ms debounce
+- **APK Size:** ~7 MB release (R8 optimized) vs ~29 MB debug
+
+---
+
+## Design System
+
+### Colors
+Purple gradient mountains with warm sunset tones:
 - **Primary:** `#7C3AED` (Violet 600)
 - **Secondary:** `#A78BFA` (Violet 400)
 - **Tertiary:** `#F59E0B` (Amber 500)
@@ -192,226 +223,97 @@ Inspired by the logo - purple gradient mountains with warm sunset tones:
 
 ### Typography
 - **Font Family:** Inter (Google Fonts)
-- Modern, clean, highly readable
-- Scales: Display, Headline, Body, Label
 
 ---
 
-## 🧪 Testing
+## Changelog
 
-### Run Unit Tests
-```bash
-./gradlew test
-```
+### v1.0.5-patch1 (2026-03-09)
+- **Fixed:** Debug builds now use real AdMob IDs (was showing test ads to distributed users)
+- **Removed:** Pixabay, Wallhaven, Pinterest, Freepik from active pipeline (no real API keys)
+- **Rewritten:** AdManager with lifecycle-aware loading and proper error handling
+- **Rewritten:** MergedWallpaperPagingSource for Pexels + Unsplash only (15 results each)
+- **Fixed:** NativeAdCard log emoji replaced with ASCII prefixes (R8 truncation fix)
+- **Fixed:** Stability AI key made optional for release builds
+- **Added:** `local.properties.template` with setup instructions
 
-### Run Instrumented Tests
-```bash
-./gradlew connectedAndroidTest
-```
+### v1.0.5 (2026-03-03)
+- **Fixed:** Ad SDK initialization race condition (ads loaded before SDK ready)
+- **Fixed:** Missing `gma_ad_services_config.xml` for Android Privacy Sandbox
+- **Fixed:** Banner ad size changed from fixed 320x50 to adaptive
+- **Added:** Enhanced ad error diagnostics with domain/cause logging
 
-### Monitor Ad Loading (ADB Logcat)
-```bash
-adb logcat | grep AdManager
-```
+### v1.0.4 (2026-03-03)
+- **Fixed:** Ads stripped by R8/ProGuard in release builds (missing keep rules)
+- **Fixed:** Placeholder API keys causing silent HTTP 401 failures
+- **Added:** `isValidApiKey()` helper for placeholder detection
+- **Added:** Comprehensive logging to all PagingSource classes
 
-**Log Indicators:**
-- 📢 = Ad loading started
-- ✅ = Ad loaded successfully
-- ❌ = Ad failed (includes error code)
+### v1.0.3
+- **Fixed:** Interstitial ads never shown (were preloaded but never triggered)
+- **Fixed:** Download and set wallpaper completely broken (null wallpaper data)
+- **Added:** Native ad cards in wallpaper grid (every 8 items)
+- **Added:** NativeAdCard with media, headline, body, CTA
 
----
-
-## 📊 Ad Integration
-
-ClearWalls uses Google AdMob with 5 ad formats:
-
-| Ad Type | Placement | Frequency |
-|---------|-----------|-----------|
-| **Banner** | Bottom of Home/Browse/Favorites | Persistent |
-| **Interstitial** | After wallpaper actions | Every 3rd download / 5th set |
-| **Rewarded** | AI Generate (credits depleted) | On-demand |
-| **Native** | Wallpaper grid | Every 12 items (Phase 2) |
-| **App Open** | App resume | 4-hour cooldown, 10s grace |
-
-### Ad Configuration Constants
-
-See `core/common/Constants.kt`:
-```kotlin
-AD_INTERSTITIAL_SET_INTERVAL = 5
-AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 3
-AD_INTERSTITIAL_COOLDOWN_MS = 60_000L  // 1 minute
-AD_FIRST_SESSION_GRACE_MS = 10_000L    // 10 seconds
-```
-
----
-
-## 📱 Screens
-
-1. **Onboarding** - First-time user introduction (3 pages)
-2. **Home** - Categories, search, wallpaper grid with pagination
-3. **Browse** - Category-filtered wallpaper grid
-4. **Favorites** - Saved wallpapers (offline access)
-5. **AI Generate** - Stability AI wallpaper generation
-6. **Wallpaper Detail** - Preview, zoom, download, set, share
-7. **Settings** - Theme, image quality, data saver, auto wallpaper
-8. **Admin Panel** - Hidden configuration (7 taps on logo + password)
-
----
-
-## 🔑 API Integrations
-
-### Current (v1.0.2)
-- **Pixabay** - Free stock photos API
-- **Wallhaven** - Wallpaper-specific API
-- **Stability AI** - AI image generation (SDXL 1.0)
-
-### Planned (Phase 2)
-- **Pexels** - High-quality free photos
-- **Unsplash** - Professional photography
-- **Pinterest** - Curated pin images
-- **Freepik** - Premium design resources
-
-### Firebase
-- **Firestore** - Curated wallpaper metadata
-- **Storage** - Hosted wallpaper images
-- **Remote Config** - Feature flags, dynamic content
-- **Crashlytics** - Crash reporting
-- **Analytics** - User behavior tracking
-
----
-
-## 🔐 Permissions
-
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.SET_WALLPAPER" />
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-```
-
----
-
-## 📈 Performance Optimizations
-
-- **Image Caching:** 250 MB Coil disk cache
-- **HTTP Caching:** 50 MB OkHttp cache
-- **Lazy Loading:** Paging 3 with configurable page size (20 items)
-- **Debounced Search:** 500ms delay to reduce API calls
-- **Connection Pooling:** Efficient HTTP connections
-- **R8 Optimization:** 72% smaller APK than competitors (5.1 MB vs 18 MB)
-
----
-
-## 🐛 Known Issues
-
-See `ONGOING_FIXES.md` for detailed tracking.
-
-### Current
-- Native ad cards not yet implemented in UI (`NativeAdCard.kt` component)
-
-### Fixed in v1.0.2
-- ✅ Native ad wrong unit ID bug
-- ✅ Added comprehensive ad logging
-- ✅ Dynamic version display in Settings
-
----
-
-## 📝 Changelog
-
-### v1.0.2 (2026-03-02)
-- **Fixed:** Native ad loading with correct ad unit ID
-- **Added:** Comprehensive logging to AdManager with emoji indicators
+### v1.0.2
+- **Fixed:** Native ad loading used wrong unit ID (BANNER instead of NATIVE)
+- **Added:** Comprehensive AdManager logging with emoji indicators
 - **Fixed:** Dynamic version display in Settings (uses BuildConfig)
 
 ### v1.0.1
-- Initial public release
-- Core features: Browse, Search, Favorites, AI Generate, Set Wallpaper
-- Multi-source integration (Pixabay, Wallhaven)
+- Initial public release with Pixabay, Wallhaven, Stability AI
 - AdMob integration (Banner, Interstitial, Rewarded, App Open)
 
-### v1.0.0
-- Beta release for testing
+---
+
+## Roadmap
+
+### Completed
+- Core wallpaper browsing and search
+- Multi-source integration (Pexels, Unsplash)
+- AI generation with Stability AI
+- Favorites and offline access
+- Full AdMob integration (5 ad types including native grid cards)
+- Theme system (Light/Dark/AMOLED/System)
+- Auto wallpaper changer with WorkManager
+- Admin panel
+
+### Planned
+- Additional API sources (Pixabay, Wallhaven, Freepik) when keys are obtained
+- Wallpaper editor (blur, hue adjustment)
+- Trending tab
+- Google sign-in
+- Collections/boards
+- Live wallpaper support
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these guidelines:
+## Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Follow the existing code style (see `CLAUDE.md`)
-4. Write clear commit messages
-5. Test thoroughly (debug + release builds)
-6. Submit a pull request
-
-### Code Standards
-- Kotlin naming conventions (camelCase, PascalCase)
-- Clean Architecture layers respected
-- MVVM pattern for presentation layer
-- Hilt for dependency injection
-- Coroutines for async operations
-- StateFlow for UI state
+2. Create a feature branch
+3. Follow Clean Architecture layers and MVVM pattern
+4. Test both debug and release builds
+5. Submit a pull request
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **Pixabay** - Free stock photos
-- **Wallhaven** - Wallpaper community
+- **Pexels** - High-quality free photos
+- **Unsplash** - Professional photography
 - **Stability AI** - SDXL image generation
 - **Firebase** - Backend infrastructure
 - **Google AdMob** - Monetization platform
-- **FreshWalls** - Inspiration for ad implementation patterns
-
----
-
-## 📞 Support
-
-- **Issues:** [GitHub Issues](https://github.com/Rahul-999-alpha/WallCraft/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/Rahul-999-alpha/WallCraft/discussions)
-- **Email:** rahul.daswani@example.com
-
----
-
-## 🗺️ Roadmap
-
-### Phase 1: Foundation (✅ Complete)
-- Core wallpaper browsing and search
-- Multi-source integration (Pixabay, Wallhaven)
-- AI generation with Stability AI
-- Favorites and offline access
-- AdMob integration (5 ad types)
-- Theme system (Light/Dark/AMOLED)
-
-### Phase 2: Enhancement (🚧 In Progress)
-- [ ] Pexels, Unsplash, Pinterest, Freepik APIs
-- [ ] Native ad cards in wallpaper grid
-- [ ] Auto-refresh with WorkManager
-- [ ] Hidden admin panel
-- [ ] Wallpaper editor (blur, hue)
-- [ ] Trending tab
-- [ ] Google sign-in
-
-### Phase 3: Advanced Features
-- [ ] Social features (share, like, comment)
-- [ ] Collections/boards
-- [ ] Custom categories
-- [ ] Wallpaper upload (UGC)
-- [ ] Premium subscription tier
-- [ ] Live wallpaper support
 
 ---
 
 <div align="center">
-  Made with ❤️ by Rahul Daswani
-
-  ⭐ Star this repo if you find it helpful!
+  Made by Rahul Daswani
 </div>
