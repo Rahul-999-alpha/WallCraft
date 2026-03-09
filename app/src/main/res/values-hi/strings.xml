@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    BUG-012 FIX: Hindi locale file.
+    Android uses this automatically for devices set to Hindi (hi).
+    English default is in res/values/strings.xml.
+-->
 <resources>
     <string name="app_name">ClearWalls</string>
     <string name="live_wallpaper_name">ClearWalls पैरालैक्स</string>

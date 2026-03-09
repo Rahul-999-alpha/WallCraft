@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.ClearWalls" parent="android:Theme.Material.Light.NoActionBar">
+
+    <!-- BUG-013 FIX: Changed parent from android:Theme.Material.Light.NoActionBar to
+         Theme.MaterialComponents.DayNight.NoActionBar for proper Compose/SplashScreen compat. -->
+    <style name="Theme.ClearWalls" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <!-- BUG-014 FIX: Splash screen starting theme for SplashScreen API. -->
+    <style name="Theme.ClearWalls.Starting" parent="Theme.SplashScreen">
+        <item name="postSplashScreenTheme">@style/Theme.ClearWalls</item>
+        <item name="windowSplashScreenBackground">#0F0D1A</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+    </style>
+
 </resources>

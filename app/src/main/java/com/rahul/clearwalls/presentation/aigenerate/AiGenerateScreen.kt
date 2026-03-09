@@ -53,27 +53,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.rahul.clearwalls.ClearWallsApp
 import com.rahul.clearwalls.core.util.AdManager
 import com.rahul.clearwalls.domain.model.AiStyle
 import com.rahul.clearwalls.domain.model.Wallpaper
 import com.rahul.clearwalls.presentation.components.AdBanner
-import androidx.compose.ui.platform.LocalContext as AndroidContext
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AiGenerateScreen(
     onWallpaperClick: (Wallpaper) -> Unit,
     viewModel: AiGenerateViewModel = hiltViewModel(),
-    adManager: AdManager = hiltViewModel<AiGenerateViewModel>().let {
-        // Get AdManager from context
+    adManager: AdManager = run {
         val context = LocalContext.current
         remember {
-            try {
-                (context.applicationContext as? com.rahul.clearwalls.ClearWallsApp)?.adManager
-                    ?: error("AdManager not available")
-            } catch (e: Exception) {
-                error("Failed to get AdManager: ${e.message}")
-            }
+            (context.applicationContext as? ClearWallsApp)?.adManager
+                ?: error("AdManager not available")
         }
     }
 ) {
@@ -156,22 +151,18 @@ fun AiGenerateScreen(
                         if (!q.canGenerate) {
                             OutlinedButton(
                                 onClick = {
-                                    val activity = context as? android.app.Activity
-                                    if (activity != null) {
-                                        adManager.showRewarded(
-                                            activity = activity,
-                                            onRewarded = {
-                                                viewModel.onAdWatched()
-                                            },
-                                            onFailed = {
-                                                coroutineScope.launch {
-                                                    snackbarHostState.showSnackbar(
-                                                        "Ad not available. Try again later."
-                                                    )
-                                                }
+                                    adManager.showRewarded(
+                                        onRewarded = {
+                                            viewModel.onAdWatched()
+                                        },
+                                        onDismissed = {
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    "Ad not available. Try again later."
+                                                )
                                             }
-                                        )
-                                    }
+                                        }
+                                    )
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.outlinedButtonColors(

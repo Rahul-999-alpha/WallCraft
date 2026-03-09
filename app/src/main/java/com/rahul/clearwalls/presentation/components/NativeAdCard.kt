@@ -58,7 +58,7 @@ fun NativeAdCard(
 
                 val adLoader = AdLoader.Builder(context, BuildConfig.ADMOB_NATIVE_ID)
                     .forNativeAd { ad ->
-                        Log.d(TAG, "✅ Native ad loaded: ${ad.headline}")
+                        Log.d(TAG, "[NATIVE] Loaded: ${ad.headline}")
                         nativeAd?.destroy()
                         nativeAd = ad
 
@@ -168,7 +168,7 @@ fun NativeAdCard(
                     }
                     .withAdListener(object : AdListener() {
                         override fun onAdFailedToLoad(error: LoadAdError) {
-                            Log.e(TAG, "❌ Native ad failed: ${error.message} (code: ${error.code})")
+                            Log.e(TAG, "[NATIVE] FAILED: ${error.message} (code: ${error.code})")
                         }
                     })
                     .withNativeAdOptions(
@@ -180,7 +180,7 @@ fun NativeAdCard(
                     .build()
 
                 adLoader.loadAd(AdRequest.Builder().build())
-                Log.d(TAG, "📢 Loading native ad...")
+                Log.d(TAG, "[NATIVE] Loading...")
                 adView
             },
             modifier = Modifier

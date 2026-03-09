@@ -2,13 +2,9 @@ package com.rahul.clearwalls.core.di
 
 import android.content.Context
 import com.rahul.clearwalls.core.common.Constants
-import com.rahul.clearwalls.data.remote.api.FreepikApi
 import com.rahul.clearwalls.data.remote.api.PexelsApi
-import com.rahul.clearwalls.data.remote.api.PinterestApi
-import com.rahul.clearwalls.data.remote.api.PixabayApi
 import com.rahul.clearwalls.data.remote.api.StabilityAiApi
 import com.rahul.clearwalls.data.remote.api.UnsplashApi
-import com.rahul.clearwalls.data.remote.api.WallhavenApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -46,25 +42,12 @@ object NetworkModule {
             .build()
     }
 
-    @Provides
-    @Singleton
-    fun providePixabayApi(okHttpClient: OkHttpClient): PixabayApi =
-        Retrofit.Builder()
-            .baseUrl(Constants.PIXABAY_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(PixabayApi::class.java)
+    // DISABLED — no API keys. Uncomment when keys are obtained.
+    // @Provides @Singleton
+    // fun providePixabayApi(okHttpClient: OkHttpClient): PixabayApi = ...
 
-    @Provides
-    @Singleton
-    fun provideWallhavenApi(okHttpClient: OkHttpClient): WallhavenApi =
-        Retrofit.Builder()
-            .baseUrl(Constants.WALLHAVEN_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(WallhavenApi::class.java)
+    // @Provides @Singleton
+    // fun provideWallhavenApi(okHttpClient: OkHttpClient): WallhavenApi = ...
 
     @Provides
     @Singleton
@@ -102,23 +85,10 @@ object NetworkModule {
             .build()
             .create(UnsplashApi::class.java)
 
-    @Provides
-    @Singleton
-    fun providePinterestApi(okHttpClient: OkHttpClient): PinterestApi =
-        Retrofit.Builder()
-            .baseUrl(Constants.PINTEREST_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(PinterestApi::class.java)
+    // DISABLED — no API keys. Uncomment when keys are obtained.
+    // @Provides @Singleton
+    // fun providePinterestApi(okHttpClient: OkHttpClient): PinterestApi = ...
 
-    @Provides
-    @Singleton
-    fun provideFreepikApi(okHttpClient: OkHttpClient): FreepikApi =
-        Retrofit.Builder()
-            .baseUrl(Constants.FREEPIK_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(FreepikApi::class.java)
+    // @Provides @Singleton
+    // fun provideFreepikApi(okHttpClient: OkHttpClient): FreepikApi = ...
 }

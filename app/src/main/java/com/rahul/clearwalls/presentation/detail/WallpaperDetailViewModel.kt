@@ -12,6 +12,7 @@ import com.rahul.clearwalls.domain.usecase.SetWallpaperUseCase
 import com.rahul.clearwalls.domain.usecase.ToggleFavoriteUseCase
 import com.rahul.clearwalls.domain.usecase.WallpaperTarget
 import android.util.Log
+import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.core.util.AdManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -61,6 +62,12 @@ class WallpaperDetailViewModel @Inject constructor(
     private val _events = MutableSharedFlow<DetailEvent>()
     val events: SharedFlow<DetailEvent> = _events.asSharedFlow()
 
+    // Interstitial gating counters (moved from old AdManager)
+    private var setWallpaperCount = 0
+    private var downloadCount = 0
+    private var lastInterstitialTime = 0L
+    private val sessionStart = System.currentTimeMillis()
+
     init {
         loadWallpaper()
     }
@@ -91,6 +98,19 @@ class WallpaperDetailViewModel @Inject constructor(
         }
     }
 
+    private fun shouldShowInterstitial(count: Int, interval: Int): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - sessionStart < Constants.AD_FIRST_SESSION_GRACE_MS) return false
+        if (now - lastInterstitialTime < Constants.AD_INTERSTITIAL_COOLDOWN_MS) return false
+        return count % interval == 0
+    }
+
+    fun showInterstitialAd() {
+        adManager.showInterstitial {
+            lastInterstitialTime = System.currentTimeMillis()
+        }
+    }
+
     fun setWallpaper(target: WallpaperTarget) {
         val wp = _wallpaper.value ?: return
         viewModelScope.launch {
@@ -99,7 +119,8 @@ class WallpaperDetailViewModel @Inject constructor(
                 .onSuccess {
                     _events.emit(DetailEvent.WallpaperSet)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper set successfully!"))
-                    if (adManager.shouldShowInterstitialOnSet()) {
+                    setWallpaperCount++
+                    if (shouldShowInterstitial(setWallpaperCount, Constants.AD_INTERSTITIAL_SET_INTERVAL)) {
                         _events.emit(DetailEvent.ShowInterstitial)
                     }
                 }
@@ -124,7 +145,8 @@ class WallpaperDetailViewModel @Inject constructor(
                 .onSuccess {
                     _events.emit(DetailEvent.WallpaperDownloaded)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper saved to gallery!"))
-                    if (adManager.shouldShowInterstitialOnDownload()) {
+                    downloadCount++
+                    if (shouldShowInterstitial(downloadCount, Constants.AD_INTERSTITIAL_DOWNLOAD_INTERVAL)) {
                         _events.emit(DetailEvent.ShowInterstitial)
                     }
                 }

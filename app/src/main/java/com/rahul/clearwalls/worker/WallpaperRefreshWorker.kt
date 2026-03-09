@@ -9,7 +9,6 @@ import com.rahul.clearwalls.data.local.dao.CachedWallpaperDao
 import com.rahul.clearwalls.data.local.entity.CachedWallpaperEntity
 import com.rahul.clearwalls.data.mapper.toWallpaper
 import com.rahul.clearwalls.data.remote.api.PexelsApi
-import com.rahul.clearwalls.data.remote.api.PixabayApi
 import com.rahul.clearwalls.domain.model.Wallpaper
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -18,7 +17,6 @@ import dagger.assisted.AssistedInject
 class WallpaperRefreshWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val pixabayApi: PixabayApi,
     private val pexelsApi: PexelsApi,
     private val cachedWallpaperDao: CachedWallpaperDao
 ) : CoroutineWorker(context, params) {
@@ -27,14 +25,8 @@ class WallpaperRefreshWorker @AssistedInject constructor(
         return try {
             val wallpapers = mutableListOf<Wallpaper>()
 
-            // Fetch from Pixabay
-            try {
-                val pixabayKey = BuildConfig.PIXABAY_API_KEY
-                if (pixabayKey.isNotBlank()) {
-                    val response = pixabayApi.searchImages(apiKey = pixabayKey, perPage = 20)
-                    wallpapers.addAll(response.hits.map { it.toWallpaper() })
-                }
-            } catch (_: Exception) {}
+            // DISABLED — no Pixabay API key. Uncomment when key is obtained.
+            // try { ... pixabayApi fetch ... } catch (_: Exception) {}
 
             // Fetch from Pexels
             try {

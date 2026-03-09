@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- BUG-017 FIX: Added settingsActivity for live wallpaper picker gear icon. -->
 <wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/live_wallpaper_description"
-    android:thumbnail="@mipmap/ic_launcher" />
+    android:thumbnail="@mipmap/ic_launcher"
+    android:settingsActivity=".presentation.MainActivity" />

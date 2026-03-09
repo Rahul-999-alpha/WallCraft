@@ -1,13 +1,15 @@
 package com.rahul.clearwalls.core.common
 
 object Constants {
-    const val PIXABAY_BASE_URL = "https://pixabay.com/"
-    const val WALLHAVEN_BASE_URL = "https://wallhaven.cc/api/"
-    const val STABILITY_AI_BASE_URL = "https://api.stability.ai/"
     const val PEXELS_BASE_URL = "https://api.pexels.com/"
     const val UNSPLASH_BASE_URL = "https://api.unsplash.com/"
-    const val PINTEREST_BASE_URL = "https://api.pinterest.com/"
-    const val FREEPIK_BASE_URL = "https://api.freepik.com/"
+    const val STABILITY_AI_BASE_URL = "https://api.stability.ai/"
+
+    // DISABLED — no API keys. Uncomment when keys are obtained.
+    // const val PIXABAY_BASE_URL = "https://pixabay.com/"
+    // const val WALLHAVEN_BASE_URL = "https://wallhaven.cc/api/"
+    // const val PINTEREST_BASE_URL = "https://api.pinterest.com/"
+    // const val FREEPIK_BASE_URL = "https://api.freepik.com/"
 
     const val DATABASE_NAME = "clearwalls_db"
     const val DATABASE_VERSION = 2

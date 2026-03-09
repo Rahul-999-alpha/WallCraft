@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# local.properties — ClearWalls
+# NEVER commit this file to version control.
+# Add "local.properties" to your .gitignore.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Android SDK path (already set by Android Studio — do not change)
+sdk.dir=/Users/YOUR_USERNAME/Library/Android/sdk
+
+# ── Keystore (for release builds) ──────────────────────────────────────────
+# Path is relative to the app/ module directory.
+KEY_STORE_PATH=../keystore/clearwalls.jks
+KEY_STORE_PASS=your_keystore_password
+KEY_ALIAS=clearwalls
+KEY_PASS=your_key_password
+
+# ── AdMob ──────────────────────────────────────────────────────────────────
+# Get these from AdMob console -> Apps -> Your app -> Ad units
+ADMOB_APP_ID=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+ADMOB_BANNER_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_INTERSTITIAL_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_REWARDED_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_NATIVE_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_APP_OPEN_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+
+# ── Active Wallpaper API Keys ──────────────────────────────────────────────
+# Pexels: https://www.pexels.com/api/
+PEXELS_API_KEY=your_pexels_api_key
+
+# Unsplash: https://unsplash.com/developers
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key
+
+# Stability AI: https://platform.stability.ai/ (powers AI Create tab)
+STABILITY_AI_API_KEY=sk-your_stability_ai_key
+
+# ── Future API Keys (uncomment in build.gradle + NetworkModule when ready) ─
+# Pixabay: https://pixabay.com/api/docs/ (free, 100 req/hr)
+# PIXABAY_API_KEY=
+# Wallhaven: https://wallhaven.cc/settings/account (free)
+# WALLHAVEN_API_KEY=
+# Pinterest: https://developers.pinterest.com/
+# PINTEREST_ACCESS_TOKEN=
+# Freepik: https://www.freepik.com/api
+# FREEPIK_API_KEY=

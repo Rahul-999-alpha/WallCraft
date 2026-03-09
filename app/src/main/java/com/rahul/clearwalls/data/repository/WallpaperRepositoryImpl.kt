@@ -8,14 +8,9 @@ import com.rahul.clearwalls.data.local.dao.FavoriteDao
 import com.rahul.clearwalls.data.mapper.toWallpaper
 import com.rahul.clearwalls.data.paging.MergedWallpaperPagingSource
 import com.rahul.clearwalls.data.paging.PexelsPagingSource
-import com.rahul.clearwalls.data.paging.PixabayPagingSource
 import com.rahul.clearwalls.data.paging.UnsplashPagingSource
-import com.rahul.clearwalls.data.paging.WallhavenPagingSource
-import com.rahul.clearwalls.data.remote.api.FreepikApi
 import com.rahul.clearwalls.data.remote.api.PexelsApi
-import com.rahul.clearwalls.data.remote.api.PixabayApi
 import com.rahul.clearwalls.data.remote.api.UnsplashApi
-import com.rahul.clearwalls.data.remote.api.WallhavenApi
 import com.rahul.clearwalls.domain.model.Category
 import com.rahul.clearwalls.domain.model.Wallpaper
 import com.rahul.clearwalls.domain.model.WallpaperSource
@@ -26,11 +21,8 @@ import javax.inject.Singleton
 
 @Singleton
 class WallpaperRepositoryImpl @Inject constructor(
-    private val pixabayApi: PixabayApi,
-    private val wallhavenApi: WallhavenApi,
     private val pexelsApi: PexelsApi,
     private val unsplashApi: UnsplashApi,
-    private val freepikApi: FreepikApi,
     private val cachedWallpaperDao: CachedWallpaperDao,
     private val favoriteDao: FavoriteDao
 ) : WallpaperRepository {
@@ -49,16 +41,14 @@ class WallpaperRepositoryImpl @Inject constructor(
         source: WallpaperSource?
     ): Flow<PagingData<Wallpaper>> = Pager(config = PAGING_CONFIG) {
         when (source) {
-            WallpaperSource.PIXABAY -> PixabayPagingSource(api = pixabayApi, category = category)
-            WallpaperSource.WALLHAVEN -> WallhavenPagingSource(api = wallhavenApi, query = category ?: "")
+            // DISABLED — no API keys. Uncomment when keys are obtained.
+            // WallpaperSource.PIXABAY -> PixabayPagingSource(api = pixabayApi, category = category)
+            // WallpaperSource.WALLHAVEN -> WallhavenPagingSource(api = wallhavenApi, query = category ?: "")
             WallpaperSource.PEXELS -> PexelsPagingSource(api = pexelsApi, query = category ?: "wallpaper")
             WallpaperSource.UNSPLASH -> UnsplashPagingSource(api = unsplashApi, query = category ?: "wallpaper")
             else -> MergedWallpaperPagingSource(
-                pixabayApi = pixabayApi,
-                wallhavenApi = wallhavenApi,
                 pexelsApi = pexelsApi,
                 unsplashApi = unsplashApi,
-                freepikApi = freepikApi,
                 category = category
             )
         }
@@ -67,21 +57,16 @@ class WallpaperRepositoryImpl @Inject constructor(
     override fun searchWallpapers(query: String): Flow<PagingData<Wallpaper>> =
         Pager(config = PAGING_CONFIG) {
             MergedWallpaperPagingSource(
-                pixabayApi = pixabayApi,
-                wallhavenApi = wallhavenApi,
                 pexelsApi = pexelsApi,
                 unsplashApi = unsplashApi,
-                freepikApi = freepikApi,
                 query = query
             )
         }.flow
 
     override fun getEditorPicks(): Flow<PagingData<Wallpaper>> =
         Pager(config = PAGING_CONFIG) {
-            PixabayPagingSource(
-                api = pixabayApi,
-                editorsChoice = true
-            )
+            // Was Pixabay editor's choice; now uses Pexels curated content
+            PexelsPagingSource(api = pexelsApi, query = "curated wallpaper")
         }.flow
 
     override suspend fun getCategories(): List<Category> = listOf(
