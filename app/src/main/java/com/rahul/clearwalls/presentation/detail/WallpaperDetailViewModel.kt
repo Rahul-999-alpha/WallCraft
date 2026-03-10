@@ -29,6 +29,7 @@ sealed class DetailEvent {
     data object WallpaperSet : DetailEvent()
     data object WallpaperDownloaded : DetailEvent()
     data object ShowInterstitial : DetailEvent()
+    data class ShowRewardedForPremium(val quality: ImageQuality) : DetailEvent()
 }
 
 @HiltViewModel
@@ -155,6 +156,19 @@ class WallpaperDetailViewModel @Inject constructor(
                 }
             _isLoading.value = false
         }
+    }
+
+    fun requestPremiumDownload(quality: ImageQuality) {
+        viewModelScope.launch {
+            _events.emit(DetailEvent.ShowRewardedForPremium(quality))
+        }
+    }
+
+    fun showRewardedAd(quality: ImageQuality) {
+        adManager.showRewarded(
+            onRewarded = { downloadWallpaper(quality) },
+            onDismissed = {}
+        )
     }
 
     fun toggleFavorite() {

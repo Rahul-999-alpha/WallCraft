@@ -31,6 +31,7 @@ fun QualityPickerSheet(
     wallpaper: Wallpaper,
     onDismiss: () -> Unit,
     onQualitySelected: (ImageQuality) -> Unit,
+    onPremiumSelected: (ImageQuality) -> Unit = onQualitySelected,
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -60,7 +61,10 @@ fun QualityPickerSheet(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onQualitySelected(quality) }
+                            .clickable {
+                                if (quality.isPremium) onPremiumSelected(quality)
+                                else onQualitySelected(quality)
+                            }
                             .padding(vertical = 12.dp, horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween

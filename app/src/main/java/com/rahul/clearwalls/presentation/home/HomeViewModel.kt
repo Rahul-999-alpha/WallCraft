@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,8 +35,11 @@ class HomeViewModel @Inject constructor(
     private val favoriteIds = favoriteRepository.getFavorites()
         .map { favorites -> favorites.map { it.id }.toSet() }
 
+    private val _refreshTrigger = MutableStateFlow(System.currentTimeMillis())
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val wallpapers: Flow<PagingData<Wallpaper>> =
-        getWallpapersUseCase()
+        _refreshTrigger.flatMapLatest { getWallpapersUseCase() }
             .cachedIn(viewModelScope)
             .combine(favoriteIds) { pagingData, favIds ->
                 pagingData.map { wallpaper ->
@@ -43,8 +47,9 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val editorPicks: Flow<PagingData<Wallpaper>> =
-        getEditorPicksUseCase()
+        _refreshTrigger.flatMapLatest { getEditorPicksUseCase() }
             .cachedIn(viewModelScope)
             .combine(favoriteIds) { pagingData, favIds ->
                 pagingData.map { wallpaper ->
@@ -67,6 +72,10 @@ class HomeViewModel @Inject constructor(
                 _categories.value = emptyList()
             }
         }
+    }
+
+    fun refresh() {
+        _refreshTrigger.value = System.currentTimeMillis()
     }
 
     fun toggleFavorite(wallpaper: Wallpaper) {

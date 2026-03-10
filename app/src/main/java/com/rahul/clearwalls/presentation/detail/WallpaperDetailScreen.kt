@@ -85,6 +85,9 @@ fun WallpaperDetailScreen(
                 is DetailEvent.ShowInterstitial -> {
                     viewModel.showInterstitialAd()
                 }
+                is DetailEvent.ShowRewardedForPremium -> {
+                    viewModel.showRewardedAd(event.quality)
+                }
             }
         }
     }
@@ -237,6 +240,9 @@ fun WallpaperDetailScreen(
                     wallpaper = wp,
                     onQualitySelected = { quality ->
                         viewModel.downloadWallpaper(quality)
+                    },
+                    onPremiumSelected = { quality ->
+                        viewModel.requestPremiumDownload(quality)
                     },
                     onDismiss = { showQualityPicker = false }
                 )

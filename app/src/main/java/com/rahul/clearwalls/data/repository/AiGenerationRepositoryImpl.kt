@@ -4,7 +4,7 @@ import android.content.Context
 import com.rahul.clearwalls.data.local.dao.AiGenerationDao
 import com.rahul.clearwalls.data.local.entity.AiGenerationEntity
 import com.rahul.clearwalls.data.local.entity.AiQuotaEntity
-import com.rahul.clearwalls.data.remote.PuterAiService
+import com.rahul.clearwalls.data.remote.PollinationsAiService
 import com.rahul.clearwalls.domain.model.AiGeneration
 import com.rahul.clearwalls.domain.model.AiQuota
 import com.rahul.clearwalls.domain.model.AiStyle
@@ -25,7 +25,7 @@ import javax.inject.Singleton
 @Singleton
 class AiGenerationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val puterAiService: PuterAiService,
+    private val pollinationsAiService: PollinationsAiService,
     private val aiGenerationDao: AiGenerationDao
 ) : AiGenerationRepository {
 
@@ -50,7 +50,7 @@ class AiGenerationRepositoryImpl @Inject constructor(
             if (isAmoled) append(", pure black background, high contrast, AMOLED optimized")
         }
 
-        val imageBytes = puterAiService.generateImage(enhancedPrompt)
+        val imageBytes = pollinationsAiService.generateImage(enhancedPrompt)
 
         val id = UUID.randomUUID().toString()
         val file = File(context.filesDir, "ai_wallpapers/$id.png").apply {

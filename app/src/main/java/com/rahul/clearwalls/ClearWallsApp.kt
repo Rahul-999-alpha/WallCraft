@@ -14,6 +14,7 @@ import androidx.work.WorkManager
 import com.google.android.gms.ads.MobileAds
 import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.core.util.AdManager
+import com.rahul.clearwalls.worker.NewWallpaperNotificationWorker
 import com.rahul.clearwalls.worker.WallpaperRefreshWorker
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.TimeUnit
@@ -49,6 +50,7 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
         }
 
         scheduleWallpaperRefresh()
+        scheduleNotificationWorker()
         setupAppOpenAds()
     }
 
@@ -65,6 +67,21 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+    private fun scheduleNotificationWorker() {
+        val work = PeriodicWorkRequestBuilder<NewWallpaperNotificationWorker>(
+            Constants.NOTIFICATION_INTERVAL_HOURS, TimeUnit.HOURS,
+            30, TimeUnit.MINUTES
+        )
+            .setInitialDelay(Constants.NOTIFICATION_INTERVAL_HOURS, TimeUnit.HOURS)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            Constants.NOTIFICATION_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            work
+        )
+    }
 
     private fun scheduleWallpaperRefresh() {
         val constraints = Constraints.Builder()

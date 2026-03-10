@@ -21,21 +21,25 @@ object Constants {
     const val HTTP_CACHE_SIZE = 50L * 1024 * 1024 // 50MB
 
     const val AD_INTERSTITIAL_COOLDOWN_MS = 60_000L
-    const val AD_FIRST_SESSION_GRACE_MS = 300_000L // 5 min
-    const val AD_INLINE_INTERVAL = 8
-    const val AD_INTERSTITIAL_SET_INTERVAL = 5
-    const val AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 3
+    const val AD_FIRST_SESSION_GRACE_MS = 120_000L // 2 min
+    const val AD_INLINE_INTERVAL = 6
+    const val AD_INTERSTITIAL_SET_INTERVAL = 3
+    const val AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 2
 
     const val SEARCH_DEBOUNCE_MS = 500L
 
     const val PREFS_DATASTORE_NAME = "clearwalls_prefs"
 
     // Admin panel
-    const val ADMIN_PASSWORD_HASH = "a0f3285b07c26c0dcd2191447f391170d06035e8d57e31a048ba87074f3a9a15" // SHA-256 of "clearwalls2024"
+    const val ADMIN_PASSWORD_HASH = "c9a2892be197443637446a05171cb0f9997ee92ebc6eb2300779471d5b9078a0" // SHA-256 of "clearwalls2024"
     const val ADMIN_TAP_COUNT = 7
 
     // WorkManager
     const val REFRESH_WORK_NAME = "wallpaper_refresh"
     const val AUTO_WALLPAPER_WORK_NAME = "auto_wallpaper"
     const val DEFAULT_REFRESH_INTERVAL_HOURS = 11L
+
+    // Notifications
+    const val NOTIFICATION_WORK_NAME = "new_wallpaper_notification"
+    const val NOTIFICATION_INTERVAL_HOURS = 4L
 }

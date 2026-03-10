@@ -49,7 +49,7 @@ object NetworkModule {
     // @Provides @Singleton
     // fun provideWallhavenApi(okHttpClient: OkHttpClient): WallhavenApi = ...
 
-    // DISABLED — Replaced by PuterAiService (Puter.js WebView bridge). No API key needed.
+    // DISABLED — Replaced by PollinationsAiService (HTTP API). No API key needed.
     // @Provides
     // @Singleton
     // fun provideStabilityAiApi(okHttpClient: OkHttpClient): StabilityAiApi {
