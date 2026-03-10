@@ -3,7 +3,7 @@
 <div align="center">
   <img src="Clear walls A1.png" alt="ClearWalls Logo" width="200"/>
 
-  [![Version](https://img.shields.io/badge/version-1.0.5-blue.svg)](https://github.com/Rahul-999-alpha/WallCraft/releases)
+  [![Version](https://img.shields.io/badge/version-1.0.7-blue.svg)](https://github.com/Rahul-999-alpha/WallCraft/releases)
   [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
   [![Android](https://img.shields.io/badge/Android-26%2B-brightgreen.svg)](https://developer.android.com)
   [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple.svg)](https://kotlinlang.org)
@@ -11,13 +11,14 @@
 
 ## Overview
 
-ClearWalls is a modern Android wallpaper app that combines curated wallpapers from Pexels and Unsplash with AI-powered wallpaper generation via Stability AI. Built with Jetpack Compose and Material 3.
+ClearWalls is a modern Android wallpaper app that combines curated wallpapers from Pexels and Unsplash with AI-powered wallpaper generation via Pollinations.ai. Built with Jetpack Compose and Material 3.
 
 ### Key Features
 
 - **Multi-Source Wallpapers** - Browse wallpapers from Pexels and Unsplash
-- **AI Generation** - Create custom wallpapers using Stability AI (SDXL)
-- **Quality Options** - Download in multiple resolutions (480p, 1080p, 2K, 4K)
+- **AI Generation** - Create custom wallpapers using Pollinations.ai (free, no API key)
+- **Quality Options** - Download in multiple resolutions (480p, 1080p, 2K, 4K with rewarded ad gate)
+- **Push Notifications** - Periodic reminders about new wallpapers (every 4 hours)
 - **Favorites** - Save and organize wallpapers for offline access
 - **Smart Search** - Debounced keyword search across all sources
 - **Theme Modes** - Light, Dark, AMOLED (pure black), and System themes
@@ -98,8 +99,7 @@ app/
    - `UNSPLASH_ACCESS_KEY` - from [unsplash.com/developers](https://unsplash.com/developers)
    - `ADMOB_APP_ID` + 5 ad unit IDs - from [AdMob console](https://admob.google.com)
 
-   **Optional:**
-   - `STABILITY_AI_API_KEY` - from [platform.stability.ai](https://platform.stability.ai/) (powers AI Create tab; shows error message if missing)
+   **Note:** AI generation uses Pollinations.ai (free, no API key required).
 
 3. **Add `google-services.json`:**
    - Download from Firebase Console
@@ -129,7 +129,7 @@ app/
 ## Build Variants
 
 ### Debug
-- **App ID:** `com.rahul.clearwalls.debug`
+- **App ID:** `com.rahul.clearwalls`
 - Uses real AdMob IDs from `local.properties` (same as release)
 - Debuggable, no obfuscation
 
@@ -149,7 +149,7 @@ app/
 |--------|---------|-------------|
 | **Pexels** | Curated + search wallpapers | Yes |
 | **Unsplash** | Search wallpapers | Yes |
-| **Stability AI** | AI wallpaper generation (SDXL) | Optional |
+| **Pollinations.ai** | AI wallpaper generation (free HTTP API) | No |
 
 ### Disabled Sources (code preserved, not wired)
 Pixabay, Wallhaven, Pinterest, and Freepik source files exist in `data/paging/` and `data/remote/` but are disconnected from the DI graph. To re-enable: uncomment providers in `NetworkModule.kt`, add keys to `local.properties`, and wire into `MergedWallpaperPagingSource`.
@@ -170,10 +170,10 @@ ClearWalls uses Google AdMob with 5 ad formats. Both debug and release builds us
 | Ad Type | Placement | Frequency |
 |---------|-----------|-----------|
 | **Banner** | Bottom of Home/Browse/Favorites | Persistent (adaptive width) |
-| **Interstitial** | After wallpaper actions | Every 3rd download / 5th set, 1-min cooldown |
-| **Rewarded** | AI Generate (credits depleted) | On-demand |
-| **Native** | Wallpaper grid | Every 8 items (full-width card) |
-| **App Open** | App resume from background | 4-hour cooldown, 5-min first-session grace |
+| **Interstitial** | After wallpaper actions | Every 2nd download / 3rd set, 1-min cooldown |
+| **Rewarded** | AI Generate (credits) + 4K download | On-demand |
+| **Native** | Wallpaper grid | Every 6 items (full-width card) |
+| **App Open** | App resume from background | 4-hour cooldown, 2-min first-session grace |
 
 ### Ad System Architecture
 - `AdManager.kt` - Singleton managing all ad lifecycle (load, show, preload)
@@ -194,7 +194,7 @@ adb logcat | grep -E "AdManager|AdBanner|ClearWallsApp|NATIVE"
 2. **Home** - Categories, search, wallpaper grid with native ad cards
 3. **Browse** - Category-filtered wallpaper grid
 4. **Favorites** - Saved wallpapers (offline access)
-5. **AI Generate** - Stability AI wallpaper generation with rewarded ads
+5. **AI Generate** - Pollinations.ai wallpaper generation with rewarded ads
 6. **Wallpaper Detail** - Preview, zoom, download, set, share
 7. **Settings** - Theme, image quality, data saver, auto wallpaper
 8. **Admin Panel** - Hidden configuration (7 taps on logo + password)
@@ -227,6 +227,19 @@ Purple gradient mountains with warm sunset tones:
 ---
 
 ## Changelog
+
+### v1.0.7 (2026-03-10)
+- **Fixed:** Admin password hash (wrong SHA-256 value)
+- **Changed:** Ad frequency increased — grace period 5min→2min, inline every 8→6, interstitial every 5/3→3/2
+- **Replaced:** Puter.js WebView AI with Pollinations.ai HTTP API (more reliable, no WebView needed)
+- **Fixed:** 4K download bypassed rewarded ad gate — now requires watching ad for premium qualities
+- **Added:** Refresh-on-resume for Editor's Picks and wallpapers (LifecycleResumeEffect)
+- **Added:** Push notifications every 4 hours for new wallpapers (WorkManager)
+
+### v1.0.6 (2026-03-09)
+- **Added:** Puter.js WebView bridge for AI generation (replaced by Pollinations.ai in v1.0.7)
+- **Fixed:** Browse category title, native ad validator warnings
+- **Overhauled:** Ad system with interstitial gating, rewarded ads, app open ads
 
 ### v1.0.5-patch1 (2026-03-09)
 - **Fixed:** Debug builds now use real AdMob IDs (was showing test ads to distributed users)
@@ -308,7 +321,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Pexels** - High-quality free photos
 - **Unsplash** - Professional photography
-- **Stability AI** - SDXL image generation
+- **Pollinations.ai** - Free AI image generation
 - **Firebase** - Backend infrastructure
 - **Google AdMob** - Monetization platform
 

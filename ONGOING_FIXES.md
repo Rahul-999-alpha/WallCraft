@@ -1,8 +1,79 @@
 # ClearWalls - Ongoing Fixes & Testing Log
 
-## Current Version: v1.0.5-patch1 (2026-03-09)
-**Previous Release:** v1.0.5 (2026-03-03)
+## Current Version: v1.0.7 (2026-03-10)
+**Previous Release:** v1.0.6 (2026-03-09)
 **Repository:** https://github.com/Rahul-999-alpha/WallCraft
+
+---
+
+## v1.0.7 Changes (2026-03-10)
+
+### 20. Admin Password Hash Wrong - FIXED
+**File:** `Constants.kt`
+
+**Root Cause:** `ADMIN_PASSWORD_HASH` was `a0f3285b...` but the actual SHA-256 of "clearwalls2024" is `c9a2892b...`. The hash was incorrect from the start.
+
+**Fix:** Replaced with the correct SHA-256 hash.
+
+---
+
+### 21. Ad Frequency Too Low - FIXED
+**File:** `Constants.kt`
+
+**Root Cause:** Ads appeared too infrequently. Grace period was 5 min, inline ads every 8 wallpapers, interstitial every 5 sets / 3 downloads.
+
+**Fix:**
+```kotlin
+AD_FIRST_SESSION_GRACE_MS = 120_000L  // was 300_000L (5 min) → 2 min
+AD_INLINE_INTERVAL = 6                // was 8 → every 6 wallpapers
+AD_INTERSTITIAL_SET_INTERVAL = 3      // was 5 → every 3 set-wallpaper actions
+AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 2 // was 3 → every 2 downloads
+```
+
+---
+
+### 22. Puter.js WebView AI Unreliable - REPLACED
+**Files:** `PollinationsAiService.kt` (new), `AiGenerationRepositoryImpl.kt`, `NetworkModule.kt`
+**Deleted:** `PuterAiService.kt`, `assets/puter_ai.html`
+
+**Root Cause:** Puter.js WebView bridge had page load timing issues and JS bridge failures. The WebView approach was inherently fragile.
+
+**Fix:** Replaced with Pollinations.ai — a free, no-auth HTTP API. Simple OkHttp GET request to `https://image.pollinations.ai/prompt/{prompt}` returns PNG bytes directly. No WebView, no JavaScript bridge, no HTML assets.
+
+---
+
+### 23. 4K Download Bypasses Ad Gate - FIXED
+**Files:** `WallpaperDetailViewModel.kt`, `QualityPickerSheet.kt`, `WallpaperDetailScreen.kt`
+
+**Root Cause:** `QualityPickerSheet` showed a lock icon on 4K but clicking it directly called `onQualitySelected(quality)` without requiring a rewarded ad. Anyone could download 4K for free.
+
+**Fix:** Added `ShowRewardedForPremium` event and `onPremiumSelected` callback. Premium qualities now trigger a rewarded ad via `adManager.showRewarded()`. Download only starts after ad completion (`onRewarded` callback).
+
+---
+
+### 24. Editor's Picks Don't Refresh on App Open - FIXED
+**Files:** `HomeViewModel.kt`, `HomeScreen.kt`
+
+**Root Cause:** `wallpapers` and `editorPicks` flows were created once at ViewModel init and `cachedIn(viewModelScope)`. They never re-fetched unless the ViewModel was recreated (which doesn't happen on bottom-nav-retained screens).
+
+**Fix:** Added `_refreshTrigger` MutableStateFlow with `flatMapLatest` to both flows. Added `LifecycleResumeEffect` in HomeScreen that calls `viewModel.refresh()` every time the composable resumes (app foregrounded, tab revisited).
+
+---
+
+### 25. No Push Notifications - IMPLEMENTED
+**Files:** `NewWallpaperNotificationWorker.kt` (new), `ic_notification.xml` (new), `ClearWallsApp.kt`, `Constants.kt`
+
+**Implementation:** `PeriodicWorkRequestBuilder` with 4-hour interval, 30-min flex, and 4-hour initial delay. Worker picks a random message from 4 options and posts a notification that opens the app. Notification channel: "New Wallpapers" (IMPORTANCE_DEFAULT).
+
+---
+
+## v1.0.6 Changes (2026-03-09)
+
+### v1.0.6 Summary
+- Added Puter.js WebView bridge for AI generation (replaced Stability AI)
+- Fixed Browse category title display
+- Fixed native ad validator warnings
+- Overhauled ad system with interstitial gating, rewarded ads, app open ads
 
 ---
 
@@ -152,7 +223,7 @@ Settings screen now uses `BuildConfig.VERSION_NAME`.
 |--------|--------|---------|
 | Pexels | Real key | Yes |
 | Unsplash | Real key | Yes |
-| Stability AI | Empty (optional) | No (AI Create shows error) |
+| Pollinations.ai | Free (no key) | Yes |
 | Pixabay | Disconnected | N/A (no key) |
 | Wallhaven | Disconnected | N/A (no key) |
 | Pinterest | Disconnected | N/A (no key) |
@@ -163,8 +234,8 @@ Settings screen now uses `BuildConfig.VERSION_NAME`.
 ## Build Configuration
 
 ```kotlin
-versionCode = 6
-versionName = "1.0.5"
+versionCode = 8
+versionName = "1.0.7"
 compileSdk = 35
 minSdk = 26
 targetSdk = 35
@@ -192,22 +263,35 @@ ADMOB_APP_OPEN_ID=ca-app-pub-6988898499933953/8255905989
 - [ ] Adaptive width fills screen
 
 ### Interstitial Ads
-- [ ] Shows on 3rd download
-- [ ] Shows on 5th wallpaper set
+- [ ] Shows on 2nd download
+- [ ] Shows on 3rd wallpaper set
 - [ ] Respects 1-minute cooldown
-- [ ] 5-minute first-session grace period
+- [ ] 2-minute first-session grace period
 
 ### Rewarded Ads
 - [ ] Button appears when AI credits depleted
 - [ ] Grants reward after completion
+- [ ] 4K download triggers rewarded ad before download starts
 
 ### Native Ads
-- [ ] Shows in wallpaper grid every 8 items
+- [ ] Shows in wallpaper grid every 6 items
 - [ ] Full-width card with media, headline, body, CTA
 
 ### App Open Ads
-- [ ] Does NOT show during first 5 minutes
+- [ ] Does NOT show during first 2 minutes
 - [ ] Shows when app resumes from background
+
+### AI Generation
+- [ ] Type prompt → Pollinations.ai returns image (no WebView)
+- [ ] Generated image saved and displayed
+
+### Refresh on Resume
+- [ ] Close app, reopen → Editor's Picks refresh
+- [ ] Switch tabs and return → wallpapers refresh
+
+### Notifications
+- [ ] Notification worker scheduled (verify via `adb shell dumpsys jobscheduler`)
+- [ ] Notification appears after 4 hours with random message
 
 ### Monitor
 ```bash
@@ -218,13 +302,12 @@ adb logcat | grep -E "AdManager|AdBanner|ClearWallsApp|NATIVE"
 
 ## Known Issues
 
-### applicationIdSuffix in Debug
-Debug builds have package `com.rahul.clearwalls.debug` due to `applicationIdSuffix = ".debug"`. If AdMob console only registers `com.rahul.clearwalls`, ads may fail in debug builds. Monitor for `ERROR_CODE_NO_FILL` or `ERROR_CODE_APP_NOT_AUTHORIZED`.
+**None currently.** The `applicationIdSuffix = ".debug"` was removed in v1.0.6 so both debug and release use `com.rahul.clearwalls`.
 
 ### WallpaperSource Enum
 `WallpaperSource` enum still has `PIXABAY`, `WALLHAVEN` entries. These are kept because existing cached/favorite wallpapers in Room database may reference these source values.
 
 ---
 
-**Last Updated:** 2026-03-09
+**Last Updated:** 2026-03-10
 **Git Branch:** master
