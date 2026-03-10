@@ -8,12 +8,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -64,7 +63,7 @@ fun NativeAdCard(
 
                         adView.removeAllViews()
 
-                        // Root layout
+                        // Root layout — all ad assets must be inside this, inside the NativeAdView
                         val rootLayout = LinearLayout(context).apply {
                             orientation = LinearLayout.VERTICAL
                             layoutParams = FrameLayout.LayoutParams(
@@ -89,33 +88,58 @@ fun NativeAdCard(
                         }
                         rootLayout.addView(adLabel)
 
-                        // Media view for ad image/video
+                        // Media view — minimum 120dp for video ads (AdMob requirement)
+                        val density = context.resources.displayMetrics.density
+                        val mediaHeightPx = (200 * density).toInt() // 200dp — well above 120dp minimum
                         val mediaView = MediaView(context).apply {
                             layoutParams = LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
-                                400
+                                mediaHeightPx
                             ).apply {
-                                setMargins(0, 8, 0, 0)
+                                setMargins(0, (8 * density).toInt(), 0, 0)
                             }
                             setImageScaleType(ImageView.ScaleType.CENTER_CROP)
                         }
                         rootLayout.addView(mediaView)
                         adView.mediaView = mediaView
 
-                        // Headline
+                        // Icon + Headline row
+                        val headerRow = LinearLayout(context).apply {
+                            orientation = LinearLayout.HORIZONTAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+                            setPadding((16 * density).toInt(), (12 * density).toInt(), (16 * density).toInt(), 0)
+                            gravity = Gravity.CENTER_VERTICAL
+                        }
+
+                        if (ad.icon != null) {
+                            val iconSizePx = (40 * density).toInt()
+                            val iconView = ImageView(context).apply {
+                                setImageDrawable(ad.icon?.drawable)
+                                layoutParams = LinearLayout.LayoutParams(iconSizePx, iconSizePx).apply {
+                                    setMargins(0, 0, (8 * density).toInt(), 0)
+                                }
+                            }
+                            headerRow.addView(iconView)
+                            adView.iconView = iconView
+                        }
+
                         val headlineView = TextView(context).apply {
                             text = ad.headline ?: ""
                             textSize = 16f
                             setTextColor(0xFF212121.toInt())
                             maxLines = 2
-                            setPadding(16, 12, 16, 0)
                             layoutParams = LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
+                                0,
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                1f
                             )
                         }
-                        rootLayout.addView(headlineView)
+                        headerRow.addView(headlineView)
                         adView.headlineView = headlineView
+                        rootLayout.addView(headerRow)
 
                         // Body text
                         if (ad.body != null) {
@@ -124,7 +148,7 @@ fun NativeAdCard(
                                 textSize = 13f
                                 setTextColor(0xFF757575.toInt())
                                 maxLines = 2
-                                setPadding(16, 4, 16, 0)
+                                setPadding((16 * density).toInt(), (4 * density).toInt(), (16 * density).toInt(), 0)
                                 layoutParams = LinearLayout.LayoutParams(
                                     LinearLayout.LayoutParams.MATCH_PARENT,
                                     LinearLayout.LayoutParams.WRAP_CONTENT
@@ -144,23 +168,16 @@ fun NativeAdCard(
                                     LinearLayout.LayoutParams.MATCH_PARENT,
                                     LinearLayout.LayoutParams.WRAP_CONTENT
                                 ).apply {
-                                    setMargins(16, 8, 16, 12)
+                                    setMargins(
+                                        (16 * density).toInt(),
+                                        (8 * density).toInt(),
+                                        (16 * density).toInt(),
+                                        (12 * density).toInt()
+                                    )
                                 }
                             }
                             rootLayout.addView(ctaButton)
                             adView.callToActionView = ctaButton
-                        }
-
-                        // Icon
-                        if (ad.icon != null) {
-                            val iconView = ImageView(context).apply {
-                                setImageDrawable(ad.icon?.drawable)
-                                layoutParams = LinearLayout.LayoutParams(48, 48).apply {
-                                    gravity = Gravity.START
-                                    setMargins(16, 8, 0, 0)
-                                }
-                            }
-                            adView.iconView = iconView
                         }
 
                         adView.addView(rootLayout)
@@ -185,7 +202,7 @@ fun NativeAdCard(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(280.dp)
+                .wrapContentHeight()
         )
     }
 }

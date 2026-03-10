@@ -15,9 +15,13 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String) {
+    /** Route used for bottom nav / general navigation (no placeholders). */
+    open val navigationRoute: String get() = route
+
     data object Onboarding : Screen("onboarding")
     data object Home : Screen("home")
     data object Browse : Screen("browse?category={category}") {
+        override val navigationRoute: String get() = "browse"
         fun createRoute(category: String? = null) =
             if (category != null) "browse?category=$category" else "browse"
     }

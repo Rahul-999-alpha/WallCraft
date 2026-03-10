@@ -116,7 +116,7 @@ fun ClearWallsMainApp() {
                             },
                             selected = selected,
                             onClick = {
-                                navController.navigate(item.screen.route) {
+                                navController.navigate(item.screen.navigationRoute) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true
                                     }
