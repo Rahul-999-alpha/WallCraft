@@ -44,7 +44,7 @@ fun BrowseScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = selectedCategory?.replaceFirstChar { it.uppercase() } ?: "Browse"
+                        text = selectedCategory?.replaceFirstChar { it.uppercase() } ?: "Categories"
                     )
                 },
                 navigationIcon = {

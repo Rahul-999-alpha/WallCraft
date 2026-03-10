@@ -19,7 +19,6 @@ fun AdBanner(
     AndroidView(
         factory = { context ->
             AdView(context).apply {
-                // Use adaptive banner for better fill rate (matches FreshWalls approach)
                 val displayMetrics = context.resources.displayMetrics
                 val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
                 setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth))
@@ -27,10 +26,12 @@ fun AdBanner(
 
                 adListener = object : AdListener() {
                     override fun onAdLoaded() {
+                        tag = "loaded"
                         Log.d("AdBanner", "Banner ad loaded successfully")
                     }
 
                     override fun onAdFailedToLoad(error: LoadAdError) {
+                        tag = "failed"
                         Log.e("AdBanner", "Banner ad FAILED: code=${error.code}, message=${error.message}, domain=${error.domain}, cause=${error.cause}")
                     }
 
@@ -45,6 +46,14 @@ fun AdBanner(
 
                 loadAd(AdRequest.Builder().build())
                 Log.d("AdBanner", "Banner ad requested with unit ID: $adUnitId")
+            }
+        },
+        update = { adView ->
+            // Retry if previous load failed (e.g. SDK wasn't ready at first factory call)
+            if (adView.tag == "failed") {
+                Log.d("AdBanner", "Retrying banner ad load...")
+                adView.tag = "retrying"
+                adView.loadAd(AdRequest.Builder().build())
             }
         },
         modifier = modifier.fillMaxWidth()

@@ -101,7 +101,8 @@ class MergedWallpaperPagingSource(
                 }
             }
 
-            Log.d(TAG, "Merged total: ${merged.size} wallpapers (page $page)")
+            merged.shuffle()
+            Log.d(TAG, "Merged total: ${merged.size} wallpapers (page $page, shuffled)")
 
             LoadResult.Page(
                 data = merged,

@@ -15,7 +15,9 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import android.content.Context
 import com.rahul.clearwalls.BuildConfig
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,9 +31,12 @@ import javax.inject.Singleton
  *  BUG-007 — App Open ad cooldown: minimum 4 hours between shows per session.
  *  BUG-008 — Single source of truth for currentActivity; ClearWallsApp has no tracking.
  *  BUG-005 — Log strings use ASCII prefixes; no 4-byte emoji subject to R8 truncation.
+ *  BUG-009 — Ad loading uses appContext so loads don't silently fail when currentActivity is null.
  */
 @Singleton
-class AdManager @Inject constructor() {
+class AdManager @Inject constructor(
+    @ApplicationContext private val appContext: Context
+) {
 
     companion object {
         private const val TAG = "AdManager"
@@ -87,7 +92,7 @@ class AdManager @Inject constructor() {
         Log.d(TAG, "[APP_OPEN] Loading...")
 
         AppOpenAd.load(
-            currentActivity ?: return Unit.also { isAppOpenAdLoading = false },
+            appContext,
             BuildConfig.ADMOB_APP_OPEN_ID,
             AdRequest.Builder().build(),
             object : AppOpenAd.AppOpenAdLoadCallback() {
@@ -148,7 +153,7 @@ class AdManager @Inject constructor() {
         Log.d(TAG, "[INTERSTITIAL] Preloading...")
 
         InterstitialAd.load(
-            currentActivity ?: return,
+            appContext,
             BuildConfig.ADMOB_INTERSTITIAL_ID,
             AdRequest.Builder().build(),
             object : InterstitialAdLoadCallback() {
@@ -194,7 +199,7 @@ class AdManager @Inject constructor() {
         Log.d(TAG, "[REWARDED] Preloading...")
 
         RewardedAd.load(
-            currentActivity ?: return,
+            appContext,
             BuildConfig.ADMOB_REWARDED_ID,
             AdRequest.Builder().build(),
             object : RewardedAdLoadCallback() {

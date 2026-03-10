@@ -1,11 +1,10 @@
 package com.rahul.clearwalls.data.repository
 
 import android.content.Context
-import com.rahul.clearwalls.BuildConfig
 import com.rahul.clearwalls.data.local.dao.AiGenerationDao
 import com.rahul.clearwalls.data.local.entity.AiGenerationEntity
 import com.rahul.clearwalls.data.local.entity.AiQuotaEntity
-import com.rahul.clearwalls.data.remote.api.StabilityAiApi
+import com.rahul.clearwalls.data.remote.PuterAiService
 import com.rahul.clearwalls.domain.model.AiGeneration
 import com.rahul.clearwalls.domain.model.AiQuota
 import com.rahul.clearwalls.domain.model.AiStyle
@@ -15,8 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -28,7 +25,7 @@ import javax.inject.Singleton
 @Singleton
 class AiGenerationRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val stabilityAiApi: StabilityAiApi,
+    private val puterAiService: PuterAiService,
     private val aiGenerationDao: AiGenerationDao
 ) : AiGenerationRepository {
 
@@ -53,17 +50,10 @@ class AiGenerationRepositoryImpl @Inject constructor(
             if (isAmoled) append(", pure black background, high contrast, AMOLED optimized")
         }
 
-        val textMediaType = "text/plain".toMediaType()
-        val response = stabilityAiApi.generateImage(
-            authorization = "Bearer ${BuildConfig.STABILITY_AI_API_KEY}",
-            prompt = enhancedPrompt.toRequestBody(textMediaType),
-            outputFormat = "jpeg".toRequestBody(textMediaType),
-            aspectRatio = "9:16".toRequestBody(textMediaType)
-        )
+        val imageBytes = puterAiService.generateImage(enhancedPrompt)
 
-        val imageBytes = response.bytes()
         val id = UUID.randomUUID().toString()
-        val file = File(context.filesDir, "ai_wallpapers/$id.jpg").apply {
+        val file = File(context.filesDir, "ai_wallpapers/$id.png").apply {
             parentFile?.mkdirs()
             writeBytes(imageBytes)
         }

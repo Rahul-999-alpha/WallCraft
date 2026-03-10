@@ -28,8 +28,8 @@ android {
         applicationId = "com.rahul.clearwalls"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.5"
+        versionCode = 7
+        versionName = "1.0.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Active content API keys
@@ -67,7 +67,8 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            applicationIdSuffix = ".debug"
+            // Removed applicationIdSuffix = ".debug" — AdMob rejects ads for
+            // unregistered package. Console is registered as com.rahul.clearwalls.
             // Use real AdMob IDs — debug builds are distributed to users.
             buildConfigField("String", "ADMOB_BANNER_ID",       "\"${localProperties.getProperty("ADMOB_BANNER_ID",       "")}\"")
             buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"${localProperties.getProperty("ADMOB_INTERSTITIAL_ID", "")}\"")

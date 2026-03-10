@@ -49,21 +49,21 @@ object NetworkModule {
     // @Provides @Singleton
     // fun provideWallhavenApi(okHttpClient: OkHttpClient): WallhavenApi = ...
 
-    @Provides
-    @Singleton
-    fun provideStabilityAiApi(okHttpClient: OkHttpClient): StabilityAiApi {
-        val aiClient = okHttpClient.newBuilder()
-            .readTimeout(120, TimeUnit.SECONDS)
-            .writeTimeout(120, TimeUnit.SECONDS)
-            .build()
-
-        return Retrofit.Builder()
-            .baseUrl(Constants.STABILITY_AI_BASE_URL)
-            .client(aiClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(StabilityAiApi::class.java)
-    }
+    // DISABLED — Replaced by PuterAiService (Puter.js WebView bridge). No API key needed.
+    // @Provides
+    // @Singleton
+    // fun provideStabilityAiApi(okHttpClient: OkHttpClient): StabilityAiApi {
+    //     val aiClient = okHttpClient.newBuilder()
+    //         .readTimeout(120, TimeUnit.SECONDS)
+    //         .writeTimeout(120, TimeUnit.SECONDS)
+    //         .build()
+    //     return Retrofit.Builder()
+    //         .baseUrl(Constants.STABILITY_AI_BASE_URL)
+    //         .client(aiClient)
+    //         .addConverterFactory(GsonConverterFactory.create())
+    //         .build()
+    //         .create(StabilityAiApi::class.java)
+    // }
 
     @Provides
     @Singleton

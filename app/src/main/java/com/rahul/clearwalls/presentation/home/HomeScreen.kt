@@ -1,20 +1,16 @@
 package com.rahul.clearwalls.presentation.home
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -26,21 +22,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.rahul.clearwalls.domain.model.Wallpaper
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import com.rahul.clearwalls.core.common.Constants
+import com.rahul.clearwalls.domain.model.Wallpaper
 import com.rahul.clearwalls.presentation.components.AdBanner
-import com.rahul.clearwalls.presentation.components.CategoryChip
 import com.rahul.clearwalls.presentation.components.NativeAdCard
 import com.rahul.clearwalls.presentation.components.SectionHeader
 import com.rahul.clearwalls.presentation.components.WallpaperCard
@@ -55,10 +52,15 @@ fun HomeScreen(
     onSettingsClick: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val categories by viewModel.categories.collectAsState()
     val wallpapers = viewModel.wallpapers.collectAsLazyPagingItems()
     val editorPicks = viewModel.editorPicks.collectAsLazyPagingItems()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    if (wallpapers.loadState.refresh !is LoadState.Loading) {
+        isRefreshing = false
+    }
 
     val greeting = when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
         in 5..11 -> "Good morning"
@@ -98,59 +100,27 @@ fun HomeScreen(
         bottomBar = { AdBanner() },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
-        Column(
+        // Wallpaper grid item counts (for ad interleaving)
+        val adInterval = Constants.AD_INLINE_INTERVAL
+        val wpCount = wallpapers.itemCount
+        val numAds = if (wpCount > adInterval) wpCount / adInterval else 0
+        val totalWpItems = wpCount + numAds
+
+        // Header items count: Editor's Picks header + row + spacer + For You header
+        val hasEditorPicks = editorPicks.itemCount > 0
+        val headerCount = if (hasEditorPicks) 3 else 1 // (EP header, EP row, For You header) or just (For You header)
+
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                wallpapers.refresh()
+                editorPicks.refresh()
+            },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Categories row
-            if (categories.isNotEmpty()) {
-                SectionHeader(title = "Categories")
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(categories) { category ->
-                        CategoryChip(
-                            label = category.displayName,
-                            selected = false,
-                            onClick = { onCategoryClick(category.name) }
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-
-            // Editor's Picks horizontal row
-            if (editorPicks.itemCount > 0) {
-                SectionHeader(title = "Editor's Picks")
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(minOf(editorPicks.itemCount, 10)) { index ->
-                        editorPicks[index]?.let { wallpaper ->
-                            WallpaperCard(
-                                wallpaper = wallpaper,
-                                onClick = { onWallpaperClick(wallpaper) },
-                                onFavoriteClick = { viewModel.toggleFavorite(it) },
-                                modifier = Modifier.width(160.dp)
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            // For You section header
-            SectionHeader(title = "For You")
-
-            // Wallpaper grid with inline native ads
-            val adInterval = Constants.AD_INLINE_INTERVAL
-            val wpCount = wallpapers.itemCount
-            val numAds = if (wpCount > adInterval) wpCount / adInterval else 0
-            val totalItems = wpCount + numAds
-
             LazyVerticalStaggeredGrid(
                 columns = StaggeredGridCells.Fixed(2),
                 contentPadding = PaddingValues(8.dp),
@@ -159,28 +129,66 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(
-                    count = totalItems,
+                    count = headerCount + totalWpItems,
                     span = { index ->
-                        if (isNativeAdPosition(index, adInterval)) {
+                        if (index < headerCount) {
                             StaggeredGridItemSpan.FullLine
                         } else {
-                            StaggeredGridItemSpan.SingleLane
+                            val wpGridIndex = index - headerCount
+                            if (isNativeAdPosition(wpGridIndex, adInterval)) {
+                                StaggeredGridItemSpan.FullLine
+                            } else {
+                                StaggeredGridItemSpan.SingleLane
+                            }
                         }
                     }
                 ) { index ->
-                    if (isNativeAdPosition(index, adInterval)) {
-                        NativeAdCard(
-                            modifier = Modifier.padding(vertical = 4.dp)
-                        )
-                    } else {
-                        val wpIndex = toWallpaperIndex(index, adInterval)
-                        if (wpIndex < wpCount) {
-                            wallpapers[wpIndex]?.let { wallpaper ->
-                                WallpaperCard(
-                                    wallpaper = wallpaper,
-                                    onClick = { onWallpaperClick(wallpaper) },
-                                    onFavoriteClick = { viewModel.toggleFavorite(it) }
+                    when {
+                        // Editor's Picks section header
+                        hasEditorPicks && index == 0 -> {
+                            SectionHeader(title = "Editor's Picks")
+                        }
+                        // Editor's Picks horizontal row
+                        hasEditorPicks && index == 1 -> {
+                            LazyRow(
+                                contentPadding = PaddingValues(horizontal = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                items(minOf(editorPicks.itemCount, 10)) { epIndex ->
+                                    editorPicks[epIndex]?.let { wallpaper ->
+                                        WallpaperCard(
+                                            wallpaper = wallpaper,
+                                            onClick = { onWallpaperClick(wallpaper) },
+                                            onFavoriteClick = { viewModel.toggleFavorite(it) },
+                                            modifier = Modifier.width(160.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        // "For You" section header
+                        index == headerCount - 1 -> {
+                            SectionHeader(title = "For You")
+                        }
+                        // Wallpaper grid items + native ads
+                        else -> {
+                            val wpGridIndex = index - headerCount
+                            if (isNativeAdPosition(wpGridIndex, adInterval)) {
+                                NativeAdCard(
+                                    modifier = Modifier.padding(vertical = 4.dp)
                                 )
+                            } else {
+                                val wpIndex = toWallpaperIndex(wpGridIndex, adInterval)
+                                if (wpIndex < wpCount) {
+                                    wallpapers[wpIndex]?.let { wallpaper ->
+                                        WallpaperCard(
+                                            wallpaper = wallpaper,
+                                            onClick = { onWallpaperClick(wallpaper) },
+                                            onFavoriteClick = { viewModel.toggleFavorite(it) }
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
