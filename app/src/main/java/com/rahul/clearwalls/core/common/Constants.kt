@@ -20,11 +20,16 @@ object Constants {
     const val IMAGE_CACHE_SIZE = 250L * 1024 * 1024 // 250MB
     const val HTTP_CACHE_SIZE = 50L * 1024 * 1024 // 50MB
 
-    const val AD_INTERSTITIAL_COOLDOWN_MS = 60_000L
-    const val AD_FIRST_SESSION_GRACE_MS = 120_000L // 2 min
-    const val AD_INLINE_INTERVAL = 6
-    const val AD_INTERSTITIAL_SET_INTERVAL = 3
-    const val AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 2
+    // Ad load retuned for the Play release (v1.0.8). The v1.0.7 values (grace 2 min,
+    // native every 6 tiles, interstitial every 2nd download with 60s cooldown) were
+    // extraction tuning for an app with an existing loyal base — on a new listing they
+    // read as adware and kill retention/ratings before any revenue accrues. Loosen
+    // first, tighten later from real retention data.
+    const val AD_INTERSTITIAL_COOLDOWN_MS = 180_000L      // 3 min between interstitials
+    const val AD_FIRST_SESSION_GRACE_MS = 600_000L        // 10 min ad-free first session
+    const val AD_INLINE_INTERVAL = 10                     // native card every 10 grid items
+    const val AD_INTERSTITIAL_SET_INTERVAL = 4            // every 4th set-wallpaper action
+    const val AD_INTERSTITIAL_DOWNLOAD_INTERVAL = 4       // every 4th download
 
     const val SEARCH_DEBOUNCE_MS = 500L
 
@@ -43,7 +48,8 @@ object Constants {
     const val AUTO_WALLPAPER_WORK_NAME = "auto_wallpaper"
     const val DEFAULT_REFRESH_INTERVAL_HOURS = 11L
 
-    // Notifications
+    // Notifications — daily, not every 4 hours: promotional pings 6x/day drive
+    // uninstalls and channel mutes on a brand-new app.
     const val NOTIFICATION_WORK_NAME = "new_wallpaper_notification"
-    const val NOTIFICATION_INTERVAL_HOURS = 4L
+    const val NOTIFICATION_INTERVAL_HOURS = 24L
 }

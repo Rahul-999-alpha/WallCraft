@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rahul.clearwalls.core.util.ConsentManager
 import com.rahul.clearwalls.domain.model.ImageQuality
 import com.rahul.clearwalls.presentation.theme.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    /** Exposed so the screen can show/relaunch the UMP privacy options form. */
+    val consentManager: ConsentManager
 ) : ViewModel() {
 
     companion object {

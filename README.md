@@ -11,14 +11,16 @@
 
 ## Overview
 
-ClearWalls is a modern Android wallpaper app that combines curated wallpapers from Pexels and Unsplash with AI-powered wallpaper generation via Pollinations.ai. Built with Jetpack Compose and Material 3.
+ClearWalls is a modern Android wallpaper app serving an owned, curated catalog (AI-generated, hosted on Firebase) plus on-device AI wallpaper generation via Pollinations.ai. Built with Jetpack Compose and Material 3.
+
+**Content model (v1.0.8):** Pexels/Unsplash were removed from the pipeline — both providers' API terms prohibit wallpaper apps. The catalog is generated and owned by us; see `tools/seed_wallpapers/`. **Publishing:** see `PUBLISHING.md` for the full Play Store runbook.
 
 ### Key Features
 
-- **Multi-Source Wallpapers** - Browse wallpapers from Pexels and Unsplash
-- **AI Generation** - Create custom wallpapers using Pollinations.ai (free, no API key)
+- **Owned Curated Catalog** - AI-generated wallpapers, hand-curated, served from Firebase (Firestore + Storage)
+- **AI Generation** - Create custom wallpapers using Pollinations.ai (free, no API key; safe-mode + prompt moderation + in-app reporting)
 - **Quality Options** - Download in multiple resolutions (480p, 1080p, 2K, 4K with rewarded ad gate)
-- **Push Notifications** - Periodic reminders about new wallpapers (every 4 hours)
+- **Push Notifications** - Daily reminder about new wallpapers (permission-gated)
 - **Favorites** - Save and organize wallpapers for offline access
 - **Smart Search** - Debounced keyword search across all sources
 - **Theme Modes** - Light, Dark, AMOLED (pure black), and System themes
@@ -92,14 +94,18 @@ app/
    ```bash
    cp local.properties.template local.properties
    ```
-   Then fill in your real API keys. See the template for details.
+   Then fill in your real values. See the template for details.
 
-   **Required keys:**
-   - `PEXELS_API_KEY` - from [pexels.com/api](https://www.pexels.com/api/)
-   - `UNSPLASH_ACCESS_KEY` - from [unsplash.com/developers](https://unsplash.com/developers)
+   **Required for release builds:**
    - `ADMOB_APP_ID` + 5 ad unit IDs - from [AdMob console](https://admob.google.com)
+   - `PRIVACY_POLICY_URL` - your hosted copy of `docs/privacy-policy.html`
+   - Keystore path/passwords
+
+   **Leave blank:** `PEXELS_API_KEY`, `UNSPLASH_ACCESS_KEY`, `STABILITY_AI_API_KEY`
+   (sources disconnected — their API terms prohibit wallpaper apps).
 
    **Note:** AI generation uses Pollinations.ai (free, no API key required).
+   Catalog content is seeded to your Firebase project via `tools/seed_wallpapers/`.
 
 3. **Add `google-services.json`:**
    - Download from Firebase Console
@@ -147,12 +153,14 @@ app/
 ### Active Sources
 | Source | Purpose | Key Required |
 |--------|---------|-------------|
-| **Pexels** | Curated + search wallpapers | Yes |
-| **Unsplash** | Search wallpapers | Yes |
-| **Pollinations.ai** | AI wallpaper generation (free HTTP API) | No |
+| **Firebase (owned)** | Curated catalog, editor picks, categories, search | No (google-services.json) |
+| **Pollinations.ai** | AI wallpaper generation (free HTTP API, safe mode) | No |
 
-### Disabled Sources (code preserved, not wired)
-Pixabay, Wallhaven, Pinterest, and Freepik source files exist in `data/paging/` and `data/remote/` but are disconnected from the DI graph. To re-enable: uncomment providers in `NetworkModule.kt`, add keys to `local.properties`, and wire into `MergedWallpaperPagingSource`.
+### Disconnected Sources (code preserved, not wired)
+Pexels and Unsplash were disconnected in v1.0.8 — **both providers' API terms
+prohibit wallpaper apps** (Pexels revokes keys; Unsplash rejects production
+approval). Pixabay, Wallhaven, Pinterest, and Freepik remain disconnected as
+before. Do not re-enable any of them for a store build.
 
 ### Firebase
 - **Firestore** - Curated wallpaper metadata
@@ -165,15 +173,18 @@ Pixabay, Wallhaven, Pinterest, and Freepik source files exist in `data/paging/` 
 
 ## Ad Integration
 
-ClearWalls uses Google AdMob with 5 ad formats. Both debug and release builds use production ad IDs.
+ClearWalls uses Google AdMob with 5 ad formats. Debug builds use Google's public
+test IDs; release builds read production IDs from `local.properties`. UMP consent
+is gathered before any ad request (see `ConsentManager`); banner/native components
+render nothing until `AdManager.adsEnabled` is true.
 
-| Ad Type | Placement | Frequency |
-|---------|-----------|-----------|
+| Ad Type | Placement | Frequency (v1.0.8, retention-first) |
+|---------|-----------|-------------------------------------|
 | **Banner** | Bottom of Home/Browse/Favorites | Persistent (adaptive width) |
-| **Interstitial** | After wallpaper actions | Every 2nd download / 3rd set, 1-min cooldown |
+| **Interstitial** | After wallpaper actions | Every 4th download / 4th set, 3-min cooldown |
 | **Rewarded** | AI Generate (credits) + 4K download | On-demand |
-| **Native** | Wallpaper grid | Every 6 items (full-width card) |
-| **App Open** | App resume from background | 4-hour cooldown, 2-min first-session grace |
+| **Native** | Wallpaper grid | Every 10 items (full-width card) |
+| **App Open** | App resume from background | 4-hour cooldown, 10-min first-session grace |
 
 ### Ad System Architecture
 - `AdManager.kt` - Singleton managing all ad lifecycle (load, show, preload)
@@ -227,6 +238,24 @@ Purple gradient mountains with warm sunset tones:
 ---
 
 ## Changelog
+
+### v1.0.8 (2026-07-22) — Play Store publish prep
+- **Content pivot:** catalog now served from owned Firebase collections
+  (`CuratedFirestorePagingSource`); Pexels/Unsplash disconnected (their API terms
+  prohibit wallpaper apps). Seeder tool added at `tools/seed_wallpapers/`.
+- **Consent:** Google UMP (certified CMP) gathers consent before any ad request;
+  banners/native gated on `AdManager.adsEnabled`; "Ad privacy options" in Settings.
+- **AI safety (Play AI-GC policy):** Pollinations `safe=true`, deterministic
+  prompt blocklist (`PromptModeration` + unit tests), in-app Report on AI results
+  and wallpaper detail (writes to Firestore `reports`).
+- **Permissions:** removed unused `READ_MEDIA_IMAGES` (Play photo-permissions
+  policy); notification worker respects denied POST_NOTIFICATIONS.
+- **Ad load retuned for retention:** 10-min first-session grace, native every
+  10 tiles, interstitial every 4th action with 3-min cooldown; notifications
+  daily instead of every 4 hours.
+- **Privacy:** `docs/privacy-policy.html` + required `PRIVACY_POLICY_URL`
+  (release build fails without it); privacy policy link in Settings.
+- **Docs:** `PUBLISHING.md` Play Console runbook.
 
 ### v1.0.7 (2026-03-10)
 - **Fixed:** Admin password hash (wrong SHA-256 value)
@@ -292,7 +321,9 @@ Purple gradient mountains with warm sunset tones:
 - Admin panel
 
 ### Planned
-- Additional API sources (Pixabay, Wallhaven, Freepik) when keys are obtained
+- API 36 / AGP 8.9+ toolchain bump (required before 31 Aug 2026 — see PUBLISHING.md §9)
+- Weekly catalog refreshes via the seeder (retention lever)
+- "Remove ads" one-time IAP via Play Billing (after retention data)
 - Wallpaper editor (blur, hue adjustment)
 - Trending tab
 - Google sign-in

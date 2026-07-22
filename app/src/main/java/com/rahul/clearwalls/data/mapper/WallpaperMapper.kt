@@ -1,5 +1,6 @@
 package com.rahul.clearwalls.data.mapper
 
+import com.google.firebase.firestore.DocumentSnapshot
 import com.rahul.clearwalls.data.local.entity.CachedWallpaperEntity
 import com.rahul.clearwalls.data.local.entity.FavoriteEntity
 import com.rahul.clearwalls.data.remote.dto.FreepikResource
@@ -148,6 +149,34 @@ fun FreepikResource.toWallpaper(): Wallpaper? {
         twoKUrl = imgUrl,
         fourKUrl = imgUrl,
         sourceUrl = url
+    )
+}
+
+/**
+ * Maps a document from the owned Firestore catalog (curated_wallpapers / editor_picks)
+ * to the domain model. Schema is produced by tools/seed_wallpapers — keep in sync.
+ */
+fun DocumentSnapshot.toCuratedWallpaper(): Wallpaper? {
+    val thumb = getString("thumbnailUrl") ?: return null
+    val full = getString("fullUrl") ?: return null
+    val preview = getString("previewUrl") ?: thumb
+    return Wallpaper(
+        id = "${WallpaperSource.CURATED_FIREBASE.prefix}_$id",
+        source = WallpaperSource.CURATED_FIREBASE,
+        title = getString("title") ?: "Wallpaper",
+        thumbnailUrl = thumb,
+        previewUrl = preview,
+        fullUrl = full,
+        width = getLong("width")?.toInt() ?: 1080,
+        height = getLong("height")?.toInt() ?: 1920,
+        dominantColor = getString("dominantColor"),
+        tags = (get("tags") as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+        category = getString("category"),
+        isAmoled = getBoolean("isAmoled") ?: false,
+        lowUrl = getString("lowUrl") ?: thumb,
+        hdUrl = getString("hdUrl") ?: preview,
+        twoKUrl = getString("twoKUrl") ?: full,
+        fourKUrl = getString("fourKUrl") ?: full
     )
 }
 

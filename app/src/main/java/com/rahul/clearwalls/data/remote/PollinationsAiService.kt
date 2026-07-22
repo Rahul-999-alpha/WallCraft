@@ -16,7 +16,10 @@ class PollinationsAiService @Inject constructor(
 ) {
     suspend fun generateImage(prompt: String): ByteArray = withContext(Dispatchers.IO) {
         val encoded = URLEncoder.encode(prompt, "UTF-8")
-        val url = "https://image.pollinations.ai/prompt/$encoded?width=1080&height=1920&nologo=true"
+        // safe=true enables Pollinations' server-side NSFW filter (errors on unsafe
+        // prompts) — backstop behind the client-side PromptModeration blocklist,
+        // both required for Play's AI-Generated Content policy.
+        val url = "https://image.pollinations.ai/prompt/$encoded?width=1080&height=1920&nologo=true&safe=true"
         val request = Request.Builder().url(url).get().build()
         val client = okHttpClient.newBuilder()
             .callTimeout(120, TimeUnit.SECONDS)

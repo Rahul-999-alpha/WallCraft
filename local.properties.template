@@ -23,15 +23,18 @@ ADMOB_REWARDED_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 ADMOB_NATIVE_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 ADMOB_APP_OPEN_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 
-# ── Active Wallpaper API Keys ──────────────────────────────────────────────
-# Pexels: https://www.pexels.com/api/
-PEXELS_API_KEY=your_pexels_api_key
+# ── Privacy policy (REQUIRED for release) ──────────────────────────────────
+# Host docs/privacy-policy.html (Cloudflare Pages / GitHub Pages) and put the
+# public URL here. Also enter the same URL in Play Console → App content.
+PRIVACY_POLICY_URL=https://your-hosted-privacy-policy-url
 
-# Unsplash: https://unsplash.com/developers
-UNSPLASH_ACCESS_KEY=your_unsplash_access_key
-
-# Stability AI: https://platform.stability.ai/ (powers AI Create tab)
-STABILITY_AI_API_KEY=sk-your_stability_ai_key
+# ── Third-party content APIs — DISCONNECTED, leave blank ───────────────────
+# Pexels/Unsplash API terms prohibit wallpaper apps; the catalog now comes from
+# the owned Firestore collections (see tools/seed_wallpapers). Leave these
+# blank so no third-party key ships inside the APK.
+PEXELS_API_KEY=
+UNSPLASH_ACCESS_KEY=
+STABILITY_AI_API_KEY=
 
 # ── Future API Keys (uncomment in build.gradle + NetworkModule when ready) ─
 # Pixabay: https://pixabay.com/api/docs/ (free, 100 req/hr)

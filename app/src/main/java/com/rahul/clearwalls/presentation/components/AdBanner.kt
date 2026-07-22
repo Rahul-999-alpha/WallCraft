@@ -3,6 +3,8 @@ package com.rahul.clearwalls.presentation.components
 import android.util.Log
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdListener
@@ -11,11 +13,16 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.google.android.gms.ads.LoadAdError
 import com.rahul.clearwalls.BuildConfig
+import com.rahul.clearwalls.core.util.AdManager
 
 @Composable
 fun AdBanner(
     modifier: Modifier = Modifier
 ) {
+    // Consent gate: no ad request before UMP consent + SDK init (AdManager.adsEnabled).
+    val adsEnabled by AdManager.adsEnabled.collectAsState()
+    if (!adsEnabled) return
+
     AndroidView(
         factory = { context ->
             AdView(context).apply {

@@ -2,6 +2,8 @@ package com.rahul.clearwalls.presentation.aigenerate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rahul.clearwalls.core.util.PromptModeration
+import com.rahul.clearwalls.data.repository.ReportRepository
 import com.rahul.clearwalls.domain.model.AiGeneration
 import com.rahul.clearwalls.domain.model.AiQuota
 import com.rahul.clearwalls.domain.model.AiStyle
@@ -26,7 +28,8 @@ import javax.inject.Inject
 class AiGenerateViewModel @Inject constructor(
     private val generateAiWallpaperUseCase: GenerateAiWallpaperUseCase,
     private val getAiQuotaUseCase: GetAiQuotaUseCase,
-    private val aiGenerationRepository: AiGenerationRepository
+    private val aiGenerationRepository: AiGenerationRepository,
+    private val reportRepository: ReportRepository
 ) : ViewModel() {
 
     private val _prompt = MutableStateFlow("")
@@ -76,6 +79,12 @@ class AiGenerateViewModel @Inject constructor(
             return
         }
 
+        // Play AI-GC policy: deterministic blocklist before any generation request.
+        if (!PromptModeration.isAllowed(currentPrompt)) {
+            viewModelScope.launch { _events.emit(PromptModeration.BLOCKED_MESSAGE) }
+            return
+        }
+
         val currentQuota = _quota.value
         if (currentQuota != null && !currentQuota.canGenerate) {
             viewModelScope.launch { _events.emit("No generations remaining. Watch an ad for more!") }
@@ -107,6 +116,21 @@ class AiGenerateViewModel @Inject constructor(
 
     fun clearResult() {
         _generatedWallpaper.value = null
+    }
+
+    /** In-app reporting of AI output (Play AI-Generated Content policy). */
+    fun reportGeneration(generation: AiGeneration) {
+        viewModelScope.launch {
+            reportRepository.submitReport(
+                contentId = generation.id,
+                contentType = ReportRepository.TYPE_AI_GENERATION,
+                title = generation.prompt,
+                imageUrl = generation.imageUrl,
+                reason = "user_flagged",
+                prompt = generation.prompt
+            )
+            _events.emit("Reported — thank you for the feedback")
+        }
     }
 
     private fun refreshQuota() {

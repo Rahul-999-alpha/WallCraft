@@ -4,38 +4,28 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.rahul.clearwalls.BuildConfig
 import com.rahul.clearwalls.data.local.dao.CachedWallpaperDao
 import com.rahul.clearwalls.data.local.entity.CachedWallpaperEntity
-import com.rahul.clearwalls.data.mapper.toWallpaper
-import com.rahul.clearwalls.data.remote.api.PexelsApi
-import com.rahul.clearwalls.domain.model.Wallpaper
+import com.rahul.clearwalls.data.remote.firebase.FirestoreDataSource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
+/**
+ * Periodically caches a slice of the owned Firestore catalog into Room so the
+ * detail screen and offline flows keep working without network.
+ */
 @HiltWorker
 class WallpaperRefreshWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val pexelsApi: PexelsApi,
+    private val firestoreDataSource: FirestoreDataSource,
     private val cachedWallpaperDao: CachedWallpaperDao
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         return try {
-            val wallpapers = mutableListOf<Wallpaper>()
-
-            // DISABLED — no Pixabay API key. Uncomment when key is obtained.
-            // try { ... pixabayApi fetch ... } catch (_: Exception) {}
-
-            // Fetch from Pexels
-            try {
-                val pexelsKey = BuildConfig.PEXELS_API_KEY
-                if (pexelsKey.isNotBlank()) {
-                    val response = pexelsApi.getCurated(apiKey = pexelsKey, perPage = 20)
-                    wallpapers.addAll(response.photos.map { it.toWallpaper() })
-                }
-            } catch (_: Exception) {}
+            val wallpapers = firestoreDataSource.getCuratedWallpapers(limit = 40) +
+                    firestoreDataSource.getEditorPicks(limit = 20)
 
             // Cache results
             val now = System.currentTimeMillis()

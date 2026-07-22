@@ -1,6 +1,7 @@
 package com.rahul.clearwalls.presentation.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Flag
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,6 +75,7 @@ fun WallpaperDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showSetSheet by remember { mutableStateOf(false) }
     var showQualityPicker by remember { mutableStateOf(false) }
+    var showReportDialog by remember { mutableStateOf(false) }
     var scale by remember { mutableFloatStateOf(1f) }
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
@@ -158,18 +162,61 @@ fun WallpaperDetailScreen(
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = Color.White)
                 }
 
-                IconButton(
-                    onClick = { viewModel.toggleFavorite() },
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.5f))
-                ) {
-                    Icon(
-                        if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        "Favorite",
-                        tint = if (isFavorite) Color.Red else Color.White
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    IconButton(
+                        onClick = { showReportDialog = true },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.5f))
+                    ) {
+                        Icon(Icons.Outlined.Flag, "Report wallpaper", tint = Color.White)
+                    }
+                    IconButton(
+                        onClick = { viewModel.toggleFavorite() },
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.5f))
+                    ) {
+                        Icon(
+                            if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            "Favorite",
+                            tint = if (isFavorite) Color.Red else Color.White
+                        )
+                    }
                 }
+            }
+
+            if (showReportDialog) {
+                AlertDialog(
+                    onDismissRequest = { showReportDialog = false },
+                    title = { Text("Report this wallpaper") },
+                    text = {
+                        Column {
+                            listOf(
+                                "Sexual or explicit content",
+                                "Violent or disturbing content",
+                                "Copyright or trademark issue",
+                                "Other"
+                            ).forEach { reason ->
+                                Text(
+                                    text = reason,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            viewModel.reportWallpaper(reason)
+                                            showReportDialog = false
+                                        }
+                                        .padding(vertical = 12.dp)
+                                )
+                            }
+                        }
+                    },
+                    confirmButton = {},
+                    dismissButton = {
+                        Button(onClick = { showReportDialog = false }) { Text("Cancel") }
+                    }
+                )
             }
 
             // Attribution badge and resolution info

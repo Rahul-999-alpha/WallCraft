@@ -49,6 +49,9 @@ fun SettingsScreen(
     val autoWallpaperEnabled by viewModel.autoWallpaperEnabled.collectAsState()
     val autoWallpaperInterval by viewModel.autoWallpaperInterval.collectAsState()
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+
     var adminTapCount by remember { mutableIntStateOf(0) }
 
     Scaffold(
@@ -215,6 +218,52 @@ fun SettingsScreen(
                     checked = dataSaverEnabled,
                     onCheckedChange = { viewModel.setDataSaver(it) }
                 )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Privacy
+            Text(
+                text = "Privacy",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(16.dp)
+            )
+            if (com.rahul.clearwalls.BuildConfig.PRIVACY_POLICY_URL.isNotBlank()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            uriHandler.openUri(com.rahul.clearwalls.BuildConfig.PRIVACY_POLICY_URL)
+                        }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text("Privacy policy", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "How ClearWalls handles your data",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (viewModel.consentManager.isPrivacyOptionsRequired) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            (context as? android.app.Activity)?.let { activity ->
+                                viewModel.consentManager.showPrivacyOptionsForm(activity) { }
+                            }
+                        }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text("Ad privacy options", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "Change your ads consent choices",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))

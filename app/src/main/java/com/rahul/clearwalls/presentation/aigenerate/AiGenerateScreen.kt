@@ -36,6 +36,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -274,12 +275,24 @@ fun AiGenerateScreen(
                                     .aspectRatio(9f / 16f)
                                     .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
                             )
-                            Text(
-                                text = "Tap to view full screen",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(12.dp)
-                            )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Tap to view full screen",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(vertical = 12.dp)
+                                )
+                                // Play AI-GC policy: in-app flagging of generated content.
+                                TextButton(onClick = { viewModel.reportGeneration(gen) }) {
+                                    Text("Report")
+                                }
+                            }
                         }
                     }
                 }

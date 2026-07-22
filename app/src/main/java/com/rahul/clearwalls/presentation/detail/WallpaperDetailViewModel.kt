@@ -14,6 +14,7 @@ import com.rahul.clearwalls.domain.usecase.WallpaperTarget
 import android.util.Log
 import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.core.util.AdManager
+import com.rahul.clearwalls.data.repository.ReportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +41,8 @@ class WallpaperDetailViewModel @Inject constructor(
     private val setWallpaperUseCase: SetWallpaperUseCase,
     private val downloadWallpaperUseCase: DownloadWallpaperUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val adManager: AdManager
+    private val adManager: AdManager,
+    private val reportRepository: ReportRepository
 ) : ViewModel() {
 
     companion object {
@@ -71,6 +73,21 @@ class WallpaperDetailViewModel @Inject constructor(
 
     init {
         loadWallpaper()
+    }
+
+    /** In-app content reporting (Play policy for AI/user-visible catalog content). */
+    fun reportWallpaper(reason: String) {
+        val wp = _wallpaper.value ?: return
+        viewModelScope.launch {
+            reportRepository.submitReport(
+                contentId = wp.id,
+                contentType = ReportRepository.TYPE_WALLPAPER,
+                title = wp.title,
+                imageUrl = wp.fullUrl,
+                reason = reason
+            )
+            _events.emit(DetailEvent.ShowMessage("Reported — thank you for the feedback"))
+        }
     }
 
     private fun loadWallpaper() {

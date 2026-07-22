@@ -32,6 +32,8 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
     @Inject lateinit var adManager: AdManager
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
+    private val isMobileAdsInitialized = java.util.concurrent.atomic.AtomicBoolean(false)
+
     override fun onCreate() {
         super.onCreate()
 
@@ -49,6 +51,21 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
             )
         }
 
+        // NOTE: MobileAds is intentionally NOT initialised here. UMP consent must be
+        // gathered first (MainActivity), which then calls initializeMobileAdsSdk().
+
+        scheduleWallpaperRefresh()
+        scheduleNotificationWorker()
+        setupAppOpenAds()
+    }
+
+    /**
+     * Starts the Mobile Ads SDK and preloads ad formats. Called from MainActivity
+     * once ConsentManager.canRequestAds is true; safe to call repeatedly.
+     */
+    fun initializeMobileAdsSdk() {
+        if (!isMobileAdsInitialized.compareAndSet(false, true)) return
+
         Log.d(TAG, "[INIT] Starting Mobile Ads SDK initialisation...")
         MobileAds.initialize(this) { initializationStatus ->
             val statusMap = initializationStatus.adapterStatusMap
@@ -57,14 +74,11 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
             }
             Log.d(TAG, "[ADMOB] SDK initialised — preloading ads")
 
+            adManager.onAdsSdkInitialized()
             adManager.preloadInterstitial()
             adManager.preloadRewarded()
             adManager.loadAppOpenAd()
         }
-
-        scheduleWallpaperRefresh()
-        scheduleNotificationWorker()
-        setupAppOpenAds()
     }
 
     private fun setupAppOpenAds() {
@@ -89,9 +103,11 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
             .setInitialDelay(Constants.NOTIFICATION_INTERVAL_HOURS, TimeUnit.HOURS)
             .build()
 
+        // UPDATE (not KEEP) so the v1.0.8 daily cadence replaces the old 4-hour
+        // schedule on upgraded installs.
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             Constants.NOTIFICATION_WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             work
         )
     }

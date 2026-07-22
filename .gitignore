@@ -24,3 +24,9 @@ app/build/
 *.xapk
 uptodown-*.zip
 competitor-analysis/
+
+# Catalog seeder artifacts (tools/seed_wallpapers)
+tools/seed_wallpapers/output/
+tools/seed_wallpapers/serviceAccount.json
+tools/seed_wallpapers/venv/
+tools/seed_wallpapers/__pycache__/

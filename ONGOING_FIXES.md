@@ -1,8 +1,58 @@
 # ClearWalls - Ongoing Fixes & Testing Log
 
-## Current Version: v1.0.7 (2026-03-10)
-**Previous Release:** v1.0.6 (2026-03-09)
+## Current Version: v1.0.8 (2026-07-22)
+**Previous Release:** v1.0.7 (2026-03-10)
 **Repository:** https://github.com/Rahul-999-alpha/WallCraft
+
+---
+
+## v1.0.8 Changes (2026-07-22) — Play Store publish prep
+
+Full rationale and the step-by-step release path live in `PUBLISHING.md`.
+
+### 26. Pexels/Unsplash Disconnected — Content Pivot to Owned Catalog
+**Why:** Both providers' API guidelines explicitly prohibit wallpaper apps
+(Pexels: key revocation; Unsplash: production approval rejected, 50 req/hr demo
+cap). Shipping them was a legal + availability risk and capped the app at tens
+of users on shared in-APK keys.
+**What:** `CuratedFirestorePagingSource` (cursor paging over `curated_wallpapers`
+/ `editor_picks`, no composite indexes needed), shared `toCuratedWallpaper()`
+mapper, repository/worker rewired to Firestore, NetworkModule providers commented
+out, release `requireKey()` for content APIs removed. Catalog seeded via
+`tools/seed_wallpapers` (generate → curate → upload; verified end-to-end against
+Pollinations on 2026-07-22). Search = lowercase token `whereArrayContains` on tags.
+
+### 27. UMP Consent (Certified CMP) Before Any Ad Request
+`ConsentManager` wraps UserMessagingPlatform; MainActivity gathers consent before
+`MobileAds.initialize` (moved out of Application.onCreate into idempotent
+`initializeMobileAdsSdk()`); `AdManager.adsEnabled` StateFlow gates AdBanner and
+NativeAdCard composables; Settings gains "Ad privacy options" (when required) and
+a privacy policy link. **Requires publishing a GDPR message in the AdMob console.**
+
+### 28. AI Safety + In-App Reporting (Play AI-Generated Content policy)
+Pollinations request now passes `safe=true`; deterministic `PromptModeration`
+blocklist runs before generation (unit-tested, `PromptModerationTest`); Report
+button on AI results and a flag/report dialog on wallpaper detail write to the
+Firestore `reports` collection (create-only rule).
+
+### 29. Unused READ_MEDIA_IMAGES Removed
+Never referenced in code; Play's Photo and Video Permissions policy rejects
+wallpaper apps requesting broad media access. Notification worker now no-ops when
+POST_NOTIFICATIONS is denied instead of relying on silent system drops.
+
+### 30. Ad Load + Notifications Retuned for a New Listing
+Grace 2→10 min, native every 6→10 tiles, interstitial 2/3→4/4 actions, cooldown
+1→3 min, notifications 4h→24h (ExistingPeriodicWorkPolicy.UPDATE so upgrades pick
+up the new cadence). v1.0.7 frequencies were extraction tuning without an
+installed base to extract from.
+
+### 31. Release Gates
+`PRIVACY_POLICY_URL` required at release build time (requireKey); versionCode 9 /
+versionName 1.0.8; UMP dependency added.
+
+### NOT verified in this pass
+No Android SDK on the authoring machine — **compile + on-device checklist in
+PUBLISHING.md §5 must be run in Android Studio before any upload.**
 
 ---
 

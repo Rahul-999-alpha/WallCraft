@@ -4,15 +4,12 @@ import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.rahul.clearwalls.BuildConfig
+import com.google.firebase.firestore.FirebaseFirestore
 import com.rahul.clearwalls.data.local.dao.CachedWallpaperDao
 import com.rahul.clearwalls.data.local.dao.FavoriteDao
 import com.rahul.clearwalls.data.mapper.toWallpaper
-import com.rahul.clearwalls.data.paging.MergedWallpaperPagingSource
-import com.rahul.clearwalls.data.paging.PexelsPagingSource
-import com.rahul.clearwalls.data.paging.UnsplashPagingSource
-import com.rahul.clearwalls.data.remote.api.PexelsApi
-import com.rahul.clearwalls.data.remote.api.UnsplashApi
+import com.rahul.clearwalls.data.paging.CuratedFirestorePagingSource
+import com.rahul.clearwalls.data.remote.firebase.FirestoreDataSource
 import com.rahul.clearwalls.domain.model.Category
 import com.rahul.clearwalls.domain.model.Wallpaper
 import com.rahul.clearwalls.domain.model.WallpaperSource
@@ -21,10 +18,19 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Serves the app's OWNED catalog from Firestore (seeded via tools/seed_wallpapers).
+ *
+ * Pexels/Unsplash were removed from the pipeline for the Play Store release: both
+ * providers' API terms explicitly prohibit wallpaper apps (Pexels revokes keys;
+ * Unsplash rejects production approval), so shipping them was a legal and
+ * availability risk. Their paging sources and DTOs remain in the tree, disconnected,
+ * in case a licensed source is ever added.
+ */
 @Singleton
 class WallpaperRepositoryImpl @Inject constructor(
-    private val pexelsApi: PexelsApi,
-    private val unsplashApi: UnsplashApi,
+    private val firestore: FirebaseFirestore,
+    private val firestoreDataSource: FirestoreDataSource,
     private val cachedWallpaperDao: CachedWallpaperDao,
     private val favoriteDao: FavoriteDao
 ) : WallpaperRepository {
@@ -36,62 +42,48 @@ class WallpaperRepositoryImpl @Inject constructor(
             enablePlaceholders = false,
             initialLoadSize = 20
         )
+
+        /** Fallback when the categories collection is unreachable (offline first launch). */
+        private val DEFAULT_CATEGORIES = listOf(
+            Category("amoled", "amoled", "AMOLED Dark", isPinned = true),
+            Category("nature", "nature", "Nature"),
+            Category("abstract", "abstract", "Abstract"),
+            Category("minimal", "minimal", "Minimal"),
+            Category("space", "space", "Space"),
+            Category("city", "city", "City"),
+            Category("gradient", "gradient", "Gradient"),
+            Category("texture", "texture", "Texture"),
+            Category("art", "art", "Art"),
+            Category("animals", "animals", "Animals"),
+            Category("flowers", "flowers", "Flowers"),
+            Category("technology", "technology", "Technology")
+        )
     }
 
     override fun getWallpapers(
         category: String?,
         source: WallpaperSource?
     ): Flow<PagingData<Wallpaper>> = Pager(config = PAGING_CONFIG) {
-        when (source) {
-            // DISABLED — no API keys. Uncomment when keys are obtained.
-            // WallpaperSource.PIXABAY -> PixabayPagingSource(api = pixabayApi, category = category)
-            // WallpaperSource.WALLHAVEN -> WallhavenPagingSource(api = wallhavenApi, query = category ?: "")
-            WallpaperSource.PEXELS -> PexelsPagingSource(api = pexelsApi, query = category ?: "wallpaper")
-            WallpaperSource.UNSPLASH -> UnsplashPagingSource(api = unsplashApi, query = category ?: "wallpaper")
-            else -> MergedWallpaperPagingSource(
-                pexelsApi = pexelsApi,
-                unsplashApi = unsplashApi,
-                category = category
-            )
-        }
+        // All sources now resolve to the owned Firestore catalog. The `source`
+        // parameter is kept for the interface; third-party branches were removed
+        // (see class doc).
+        CuratedFirestorePagingSource(firestore = firestore, category = category)
     }.flow
 
     override fun searchWallpapers(query: String): Flow<PagingData<Wallpaper>> =
         Pager(config = PAGING_CONFIG) {
-            MergedWallpaperPagingSource(
-                pexelsApi = pexelsApi,
-                unsplashApi = unsplashApi,
-                query = query
-            )
+            CuratedFirestorePagingSource(firestore = firestore, searchQuery = query)
         }.flow
 
     override fun getEditorPicks(): Flow<PagingData<Wallpaper>> =
         Pager(config = PAGING_CONFIG) {
-            // Was Pixabay editor's choice; now uses Pexels curated content
-            PexelsPagingSource(api = pexelsApi, query = "curated wallpaper")
+            CuratedFirestorePagingSource(firestore = firestore, editorPicksOnly = true)
         }.flow
 
-    override suspend fun getCategories(): List<Category> = listOf(
-        Category("amoled", "amoled", "AMOLED Dark", isPinned = true),
-        Category("nature", "nature", "Nature"),
-        Category("abstract", "abstract", "Abstract"),
-        Category("minimal", "minimal", "Minimal"),
-        Category("anime", "anime", "Anime"),
-        Category("cars", "cars", "Cars"),
-        Category("space", "space", "Space"),
-        Category("city", "city", "City"),
-        Category("animals", "animals", "Animals"),
-        Category("sports", "sports", "Sports"),
-        Category("flowers", "flowers", "Flowers"),
-        Category("travel", "travel", "Travel"),
-        Category("food", "food", "Food"),
-        Category("music", "music", "Music"),
-        Category("technology", "technology", "Technology"),
-        Category("art", "art", "Art"),
-        Category("motivational", "motivational quotes wallpaper", "Motivational"),
-        Category("gradient", "gradient background", "Gradient"),
-        Category("texture", "texture pattern", "Texture")
-    )
+    override suspend fun getCategories(): List<Category> {
+        val remote = firestoreDataSource.getCategories()
+        return remote.ifEmpty { DEFAULT_CATEGORIES }
+    }
 
     override suspend fun getWallpaperById(id: String): Wallpaper? {
         // Check cached wallpapers first (has all quality URLs)
@@ -102,19 +94,10 @@ class WallpaperRepositoryImpl @Inject constructor(
     }
 
     override suspend fun trackDownload(wallpaper: Wallpaper) {
-        // Unsplash API guideline: hit the photo's download endpoint on a real download.
-        // Skipping this risks the production rate limit / access key. Best-effort only —
-        // it must never fail the user's download.
-        if (wallpaper.source != WallpaperSource.UNSPLASH) return
-        val accessKey = BuildConfig.UNSPLASH_ACCESS_KEY
-        if (accessKey.isBlank()) return
-        val photoId = wallpaper.id.removePrefix("${WallpaperSource.UNSPLASH.prefix}_")
-        try {
-            unsplashApi.trackDownload("Client-ID $accessKey", photoId)
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.w("WallpaperRepository", "Unsplash trackDownload failed: ${e.message}")
+        // Third-party sources are disconnected; nothing to notify for owned content.
+        // Kept for legacy favorites saved from the old pipeline.
+        if (wallpaper.source == WallpaperSource.UNSPLASH) {
+            Log.d("WallpaperRepository", "Skipping legacy Unsplash download tracking (source disconnected)")
         }
     }
 }

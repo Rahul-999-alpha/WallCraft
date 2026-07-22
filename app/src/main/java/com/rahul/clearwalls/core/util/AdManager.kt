@@ -18,6 +18,9 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import android.content.Context
 import com.rahul.clearwalls.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,6 +45,18 @@ class AdManager @Inject constructor(
         private const val TAG = "AdManager"
         private const val APP_OPEN_MIN_INTERVAL_MS = 4 * 60 * 60 * 1000L
         private const val APP_OPEN_COLD_START_DELAY_MS = 5_000L
+
+        // Consent gate: flips true only after UMP consent is gathered and
+        // MobileAds.initialize completes. Banner/native composables collect this and
+        // must not request ads while false. Static so plain composables can reach it
+        // without DI plumbing.
+        private val _adsEnabled = MutableStateFlow(false)
+        val adsEnabled: StateFlow<Boolean> = _adsEnabled.asStateFlow()
+    }
+
+    /** Called by ClearWallsApp once the Mobile Ads SDK finishes initialising. */
+    fun onAdsSdkInitialized() {
+        _adsEnabled.value = true
     }
 
     // ── State ────────────────────────────────────────────────────────────────

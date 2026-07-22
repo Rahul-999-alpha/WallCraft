@@ -28,14 +28,15 @@ android {
         applicationId = "com.rahul.clearwalls"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.0.7"
+        versionCode = 9
+        versionName = "1.0.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Active content API keys.
-        // ACCEPTED TRADEOFF: Pexels/Unsplash keys ship inside the distributed APK
-        // (free-tier, no billing). Monitor the provider dashboards for quota abuse;
-        // if abused, proxy via a Firebase Cloud Function and drop the keys from the client.
+        // DISCONNECTED content APIs — Pexels/Unsplash removed from the release pipeline
+        // (their API terms prohibit wallpaper apps). Stubs kept so the disconnected
+        // paging sources still compile; leave these blank in local.properties so no
+        // third-party key ships inside the APK. Catalog comes from owned Firestore
+        // collections (see tools/seed_wallpapers).
         buildConfigField("String", "PEXELS_API_KEY",      "\"${localProperties.getProperty("PEXELS_API_KEY",      "")}\"")
         buildConfigField("String", "UNSPLASH_ACCESS_KEY", "\"${localProperties.getProperty("UNSPLASH_ACCESS_KEY", "")}\"")
         buildConfigField("String", "STABILITY_AI_API_KEY","\"${localProperties.getProperty("STABILITY_AI_API_KEY","")}\"")
@@ -45,6 +46,9 @@ android {
         buildConfigField("String", "WALLHAVEN_API_KEY",      "\"\"")
         buildConfigField("String", "PINTEREST_ACCESS_TOKEN", "\"\"")
         buildConfigField("String", "FREEPIK_API_KEY",        "\"\"")
+
+        // Hosted privacy policy (required by Play data safety + AdMob). Release enforces it.
+        buildConfigField("String", "PRIVACY_POLICY_URL", "\"${localProperties.getProperty("PRIVACY_POLICY_URL", "")}\"")
 
         // AdMob IDs — empty in defaultConfig; debug overrides to test IDs, release enforces real IDs.
         buildConfigField("String", "ADMOB_BANNER_ID",       "\"\"")
@@ -104,10 +108,12 @@ android {
             // BUG-003 FIX: admobAppId validated — no test-ID fallback possible.
             manifestPlaceholders["admobAppId"] = requireKey("ADMOB_APP_ID")
 
-            // Active content API keys validated for release.
-            buildConfigField("String", "PEXELS_API_KEY",       "\"${requireKey("PEXELS_API_KEY")}\"")
-            buildConfigField("String", "UNSPLASH_ACCESS_KEY",  "\"${requireKey("UNSPLASH_ACCESS_KEY")}\"")
-            // Stability AI key is optional — AI Create tab shows error if missing.
+            // Third-party content keys intentionally NOT required (sources disconnected;
+            // catalog is the owned Firestore collection). AI generation uses
+            // Pollinations.ai, which needs no key.
+
+            // Play requires a reachable privacy policy; fail the release build without one.
+            buildConfigField("String", "PRIVACY_POLICY_URL", "\"${requireKey("PRIVACY_POLICY_URL")}\"")
         }
     }
 
@@ -180,6 +186,9 @@ dependencies {
 
     // AdMob
     implementation("com.google.android.gms:play-services-ads:23.6.0")
+    // Google's certified consent management platform (GDPR/EEA + US state privacy).
+    // Required for serving AdMob ads in the EEA/UK since Jan 2024.
+    implementation("com.google.android.ump:user-messaging-platform:3.1.0")
 
     // BUG-013 FIX: Material Components required for Theme.MaterialComponents parent
     implementation("com.google.android.material:material:1.12.0")

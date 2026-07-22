@@ -19,6 +19,16 @@ class NewWallpaperNotificationWorker @AssistedInject constructor(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        // Respect the user's choice: if POST_NOTIFICATIONS was denied (Android 13+),
+        // do nothing rather than let the system silently drop the notification.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                applicationContext, android.Manifest.permission.POST_NOTIFICATIONS
+            ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            return Result.success()
+        }
+
         val channelId = "new_wallpapers"
         val nm = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

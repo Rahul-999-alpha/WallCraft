@@ -2,9 +2,9 @@ package com.rahul.clearwalls.data.remote.firebase
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.rahul.clearwalls.data.mapper.toCuratedWallpaper
 import com.rahul.clearwalls.domain.model.Category
 import com.rahul.clearwalls.domain.model.Wallpaper
-import com.rahul.clearwalls.domain.model.WallpaperSource
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +21,7 @@ class FirestoreDataSource @Inject constructor(
             .await()
 
         snapshot.documents.mapNotNull { doc ->
-            doc.toWallpaper()
+            doc.toCuratedWallpaper()
         }
     } catch (e: Exception) {
         emptyList()
@@ -36,7 +36,7 @@ class FirestoreDataSource @Inject constructor(
             query = query.whereEqualTo("category", category)
         }
         val snapshot = query.limit(limit).get().await()
-        snapshot.documents.mapNotNull { it.toWallpaper() }
+        snapshot.documents.mapNotNull { it.toCuratedWallpaper() }
     } catch (e: Exception) {
         emptyList()
     }
@@ -61,20 +61,4 @@ class FirestoreDataSource @Inject constructor(
         emptyList()
     }
 
-    private fun com.google.firebase.firestore.DocumentSnapshot.toWallpaper(): Wallpaper? {
-        return Wallpaper(
-            id = "${WallpaperSource.CURATED_FIREBASE.prefix}_$id",
-            source = WallpaperSource.CURATED_FIREBASE,
-            title = getString("title") ?: "Wallpaper",
-            thumbnailUrl = getString("thumbnailUrl") ?: return null,
-            previewUrl = getString("previewUrl") ?: getString("thumbnailUrl") ?: return null,
-            fullUrl = getString("fullUrl") ?: return null,
-            width = getLong("width")?.toInt() ?: 1080,
-            height = getLong("height")?.toInt() ?: 1920,
-            dominantColor = getString("dominantColor"),
-            tags = (get("tags") as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
-            category = getString("category"),
-            isAmoled = getBoolean("isAmoled") ?: false
-        )
-    }
 }

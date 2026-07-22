@@ -9,7 +9,9 @@
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- READ_MEDIA_IMAGES intentionally NOT declared: it was never used in code, and
+         Play's Photo and Video Permissions policy rejects wallpaper apps that request
+         broad media access. Downloads write via MediaStore (no permission on API 29+). -->
     <!-- BUG-011 FIX: Required on Android 13+ for WorkManager foreground notifications
          and AdMob offline notification ads. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

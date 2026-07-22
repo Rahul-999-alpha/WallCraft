@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,7 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.rahul.clearwalls.BuildConfig
+import com.rahul.clearwalls.core.util.AdManager
 import java.util.concurrent.atomic.AtomicBoolean
 
 private const val TAG = "NativeAdCard"
@@ -38,6 +40,10 @@ private const val TAG = "NativeAdCard"
 fun NativeAdCard(
     modifier: Modifier = Modifier
 ) {
+    // Consent gate: no ad request before UMP consent + SDK init (AdManager.adsEnabled).
+    val adsEnabled by AdManager.adsEnabled.collectAsState()
+    if (!adsEnabled) return
+
     var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
     // Guards the race where a load completes after this grid slot has scrolled away and been
     // released — without it the callback reassigns nativeAd on a disposed slot and leaks it.

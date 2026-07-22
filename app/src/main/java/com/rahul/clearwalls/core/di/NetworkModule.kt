@@ -3,9 +3,6 @@ package com.rahul.clearwalls.core.di
 import android.content.Context
 import com.rahul.clearwalls.BuildConfig
 import com.rahul.clearwalls.core.common.Constants
-import com.rahul.clearwalls.data.remote.api.PexelsApi
-import com.rahul.clearwalls.data.remote.api.StabilityAiApi
-import com.rahul.clearwalls.data.remote.api.UnsplashApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -72,25 +69,26 @@ object NetworkModule {
     //         .create(StabilityAiApi::class.java)
     // }
 
-    @Provides
-    @Singleton
-    fun providePexelsApi(okHttpClient: OkHttpClient): PexelsApi =
-        Retrofit.Builder()
-            .baseUrl(Constants.PEXELS_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(PexelsApi::class.java)
-
-    @Provides
-    @Singleton
-    fun provideUnsplashApi(okHttpClient: OkHttpClient): UnsplashApi =
-        Retrofit.Builder()
-            .baseUrl(Constants.UNSPLASH_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(UnsplashApi::class.java)
+    // DISCONNECTED for Play release — Pexels/Unsplash API terms prohibit wallpaper apps
+    // (key revocation / production-approval rejection). Catalog now comes from the owned
+    // Firestore collections; see WallpaperRepositoryImpl and tools/seed_wallpapers.
+    // @Provides @Singleton
+    // fun providePexelsApi(okHttpClient: OkHttpClient): PexelsApi =
+    //     Retrofit.Builder()
+    //         .baseUrl(Constants.PEXELS_BASE_URL)
+    //         .client(okHttpClient)
+    //         .addConverterFactory(GsonConverterFactory.create())
+    //         .build()
+    //         .create(PexelsApi::class.java)
+    //
+    // @Provides @Singleton
+    // fun provideUnsplashApi(okHttpClient: OkHttpClient): UnsplashApi =
+    //     Retrofit.Builder()
+    //         .baseUrl(Constants.UNSPLASH_BASE_URL)
+    //         .client(okHttpClient)
+    //         .addConverterFactory(GsonConverterFactory.create())
+    //         .build()
+    //         .create(UnsplashApi::class.java)
 
     // DISABLED — no API keys. Uncomment when keys are obtained.
     // @Provides @Singleton

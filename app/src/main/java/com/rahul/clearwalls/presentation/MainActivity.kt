@@ -26,6 +26,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.rahul.clearwalls.ClearWallsApp
+import com.rahul.clearwalls.core.util.ConsentManager
 import com.rahul.clearwalls.presentation.navigation.NavGraph
 import com.rahul.clearwalls.presentation.navigation.Screen
 import com.rahul.clearwalls.presentation.navigation.bottomNavItems
@@ -39,7 +41,12 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+
     @Inject lateinit var dataStore: DataStore<Preferences>
+    @Inject lateinit var consentManager: ConsentManager
 
     // BUG-011 FIX: Notification permission launcher for Android 13+
     private val notificationPermissionLauncher = registerForActivityResult(
@@ -57,6 +64,21 @@ class MainActivity : ComponentActivity() {
 
         // BUG-011 FIX: Request POST_NOTIFICATIONS on Android 13+.
         requestNotificationPermissionIfNeeded()
+
+        // AdMob policy: gather UMP consent BEFORE any ad request. The SDK starts only
+        // when canRequestAds is true — either right away (consent cached from a prior
+        // session / not required in this region) or after the form is dismissed.
+        consentManager.gatherConsent(this) { formError ->
+            formError?.let {
+                android.util.Log.w(TAG, "Consent form error ${it.errorCode}: ${it.message}")
+            }
+            if (consentManager.canRequestAds) {
+                (application as ClearWallsApp).initializeMobileAdsSdk()
+            }
+        }
+        if (consentManager.canRequestAds) {
+            (application as ClearWallsApp).initializeMobileAdsSdk()
+        }
 
         setContent {
             val themeMode by dataStore.data
