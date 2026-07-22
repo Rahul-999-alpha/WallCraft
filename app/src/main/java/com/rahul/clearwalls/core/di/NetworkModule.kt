@@ -1,6 +1,7 @@
 package com.rahul.clearwalls.core.di
 
 import android.content.Context
+import com.rahul.clearwalls.BuildConfig
 import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.data.remote.api.PexelsApi
 import com.rahul.clearwalls.data.remote.api.StabilityAiApi
@@ -36,7 +37,13 @@ object NetworkModule {
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BASIC
+                    // Keep request logging off in release so user search queries never reach
+                    // production logcat.
+                    level = if (BuildConfig.DEBUG) {
+                        HttpLoggingInterceptor.Level.BASIC
+                    } else {
+                        HttpLoggingInterceptor.Level.NONE
+                    }
                 }
             )
             .build()

@@ -11,7 +11,9 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.core.util.AdManager
 import com.rahul.clearwalls.worker.NewWallpaperNotificationWorker
@@ -35,6 +37,17 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
 
         // BUG-008 FIX: Activity lifecycle tracking is now owned entirely by AdManager.
         adManager.registerActivityTracking(this)
+
+        // SECURITY: on debug/development builds, force every device to receive test ads
+        // so production fill/revenue is never affected by development traffic. Release
+        // builds leave this unset and serve real ads via the production ad units.
+        if (BuildConfig.DEBUG) {
+            MobileAds.setRequestConfiguration(
+                RequestConfiguration.Builder()
+                    .setTestDeviceIds(listOf(AdRequest.DEVICE_ID_EMULATOR))
+                    .build()
+            )
+        }
 
         Log.d(TAG, "[INIT] Starting Mobile Ads SDK initialisation...")
         MobileAds.initialize(this) { initializationStatus ->

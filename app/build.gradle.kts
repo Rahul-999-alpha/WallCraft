@@ -32,7 +32,10 @@ android {
         versionName = "1.0.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Active content API keys
+        // Active content API keys.
+        // ACCEPTED TRADEOFF: Pexels/Unsplash keys ship inside the distributed APK
+        // (free-tier, no billing). Monitor the provider dashboards for quota abuse;
+        // if abused, proxy via a Firebase Cloud Function and drop the keys from the client.
         buildConfigField("String", "PEXELS_API_KEY",      "\"${localProperties.getProperty("PEXELS_API_KEY",      "")}\"")
         buildConfigField("String", "UNSPLASH_ACCESS_KEY", "\"${localProperties.getProperty("UNSPLASH_ACCESS_KEY", "")}\"")
         buildConfigField("String", "STABILITY_AI_API_KEY","\"${localProperties.getProperty("STABILITY_AI_API_KEY","")}\"")
@@ -67,15 +70,18 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
-            // Removed applicationIdSuffix = ".debug" — AdMob rejects ads for
-            // unregistered package. Console is registered as com.rahul.clearwalls.
-            // Use real AdMob IDs — debug builds are distributed to users.
-            buildConfigField("String", "ADMOB_BANNER_ID",       "\"${localProperties.getProperty("ADMOB_BANNER_ID",       "")}\"")
-            buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"${localProperties.getProperty("ADMOB_INTERSTITIAL_ID", "")}\"")
-            buildConfigField("String", "ADMOB_REWARDED_ID",     "\"${localProperties.getProperty("ADMOB_REWARDED_ID",     "")}\"")
-            buildConfigField("String", "ADMOB_NATIVE_ID",       "\"${localProperties.getProperty("ADMOB_NATIVE_ID",       "")}\"")
-            buildConfigField("String", "ADMOB_APP_OPEN_ID",     "\"${localProperties.getProperty("ADMOB_APP_OPEN_ID",     "")}\"")
-            manifestPlaceholders["admobAppId"] = localProperties.getProperty("ADMOB_APP_ID", "")
+            // SECURITY: debug is a DEVELOPMENT variant only — never distribute it to users
+            // (debuggable APKs allow JDWP attach, run-as, and adb backup of private data).
+            // Ship the release build (Play internal-testing track for testers).
+            // Debug uses Google's public TEST AdMob unit IDs so development traffic never
+            // hits the production ad account. Combined with RequestConfiguration.setTestDeviceIds
+            // in ClearWallsApp (DEBUG-only) this keeps AdMob policy-safe during development.
+            buildConfigField("String", "ADMOB_BANNER_ID",       "\"ca-app-pub-3940256099942544/6300978111\"")
+            buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
+            buildConfigField("String", "ADMOB_REWARDED_ID",     "\"ca-app-pub-3940256099942544/5224354917\"")
+            buildConfigField("String", "ADMOB_NATIVE_ID",       "\"ca-app-pub-3940256099942544/2247696110\"")
+            buildConfigField("String", "ADMOB_APP_OPEN_ID",     "\"ca-app-pub-3940256099942544/9257395921\"")
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
         }
 
         release {

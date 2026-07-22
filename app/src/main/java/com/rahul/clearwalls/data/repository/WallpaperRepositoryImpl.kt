@@ -1,8 +1,10 @@
 package com.rahul.clearwalls.data.repository
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.rahul.clearwalls.BuildConfig
 import com.rahul.clearwalls.data.local.dao.CachedWallpaperDao
 import com.rahul.clearwalls.data.local.dao.FavoriteDao
 import com.rahul.clearwalls.data.mapper.toWallpaper
@@ -97,5 +99,22 @@ class WallpaperRepositoryImpl @Inject constructor(
         // Fallback to favorites table
         favoriteDao.getById(id)?.let { return it.toWallpaper() }
         return null
+    }
+
+    override suspend fun trackDownload(wallpaper: Wallpaper) {
+        // Unsplash API guideline: hit the photo's download endpoint on a real download.
+        // Skipping this risks the production rate limit / access key. Best-effort only —
+        // it must never fail the user's download.
+        if (wallpaper.source != WallpaperSource.UNSPLASH) return
+        val accessKey = BuildConfig.UNSPLASH_ACCESS_KEY
+        if (accessKey.isBlank()) return
+        val photoId = wallpaper.id.removePrefix("${WallpaperSource.UNSPLASH.prefix}_")
+        try {
+            unsplashApi.trackDownload("Client-ID $accessKey", photoId)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w("WallpaperRepository", "Unsplash trackDownload failed: ${e.message}")
+        }
     }
 }

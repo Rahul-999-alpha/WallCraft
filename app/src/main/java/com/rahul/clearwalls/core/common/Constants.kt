@@ -30,8 +30,12 @@ object Constants {
 
     const val PREFS_DATASTORE_NAME = "clearwalls_prefs"
 
-    // Admin panel
-    const val ADMIN_PASSWORD_HASH = "c9a2892be197443637446a05171cb0f9997ee92ebc6eb2300779471d5b9078a0" // SHA-256 of "clearwalls2024"
+    // Admin panel — DEBUG builds only (the reveal gesture and route are gated on BuildConfig.DEBUG).
+    // SECURITY: this hash's plaintext was previously committed in a source comment and remains in
+    // git history, so the credential is compromised and MUST be rotated (replace with a fresh
+    // SHA-256). It only unlocks a local, non-authoritative DataStore config — not any server-side
+    // entitlement — so real premium access must be enforced by Play Billing, not this flag.
+    const val ADMIN_PASSWORD_HASH = "c9a2892be197443637446a05171cb0f9997ee92ebc6eb2300779471d5b9078a0"
     const val ADMIN_TAP_COUNT = 7
 
     // WorkManager

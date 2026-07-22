@@ -146,10 +146,13 @@ fun NavGraph(
             )
         }
 
-        composable(Screen.Admin.route) {
-            AdminScreen(
-                onBackClick = { navController.popBackStack() }
-            )
+        // Admin panel is a DEBUG-only development tool; the route is not registered in release.
+        if (com.rahul.clearwalls.BuildConfig.DEBUG) {
+            composable(Screen.Admin.route) {
+                AdminScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

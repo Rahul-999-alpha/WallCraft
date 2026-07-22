@@ -12,4 +12,7 @@ interface WallpaperRepository {
     fun getEditorPicks(): Flow<PagingData<Wallpaper>>
     suspend fun getCategories(): List<Category>
     suspend fun getWallpaperById(id: String): Wallpaper?
+
+    /** Reports a download to the source provider where required (Unsplash API guideline). Best-effort. */
+    suspend fun trackDownload(wallpaper: Wallpaper)
 }

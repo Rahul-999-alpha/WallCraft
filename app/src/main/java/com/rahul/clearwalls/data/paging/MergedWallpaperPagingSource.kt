@@ -8,6 +8,7 @@ import com.rahul.clearwalls.data.mapper.toWallpaper
 import com.rahul.clearwalls.data.remote.api.PexelsApi
 import com.rahul.clearwalls.data.remote.api.UnsplashApi
 import com.rahul.clearwalls.domain.model.Wallpaper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -38,51 +39,59 @@ class MergedWallpaperPagingSource(
         return try {
             val searchQuery = query.ifBlank { category ?: "wallpaper" }
 
-            val sources = coroutineScope {
+            // Each source returns Result: success (possibly empty when its key is absent)
+            // or failure. We keep per-source isolation, but no longer collapse a real
+            // network/quota failure into a fake empty page. CancellationException is
+            // rethrown so structured concurrency is preserved.
+            val results = coroutineScope {
                 // DISABLED — no API keys. Uncomment when keys are obtained.
                 // val pixabayDeferred = async { ... }
-                // val wallhavenDeferred = async { ... }
-                // val freepikDeferred = async { ... }
 
                 val pexelsDeferred = async {
-                    try {
-                        val apiKey = BuildConfig.PEXELS_API_KEY
-                        if (!isValidApiKey(apiKey)) {
-                            Log.w(TAG, "Pexels: skipped (invalid key)")
-                            return@async emptyList()
+                    val apiKey = BuildConfig.PEXELS_API_KEY
+                    if (!isValidApiKey(apiKey)) {
+                        Log.w(TAG, "Pexels: skipped (invalid key)")
+                        Result.success(emptyList())
+                    } else {
+                        try {
+                            val response = pexelsApi.searchPhotos(
+                                apiKey = apiKey,
+                                query = searchQuery,
+                                page = page,
+                                perPage = 15
+                            )
+                            Log.d(TAG, "Pexels: loaded ${response.photos.size} wallpapers")
+                            Result.success(response.photos.map { it.toWallpaper() })
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Pexels: failed - ${e.message}")
+                            Result.failure(e)
                         }
-                        val response = pexelsApi.searchPhotos(
-                            apiKey = apiKey,
-                            query = searchQuery,
-                            page = page,
-                            perPage = 15
-                        )
-                        Log.d(TAG, "Pexels: loaded ${response.photos.size} wallpapers")
-                        response.photos.map { it.toWallpaper() }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Pexels: failed - ${e.message}")
-                        emptyList()
                     }
                 }
 
                 val unsplashDeferred = async {
-                    try {
-                        val accessKey = BuildConfig.UNSPLASH_ACCESS_KEY
-                        if (!isValidApiKey(accessKey)) {
-                            Log.w(TAG, "Unsplash: skipped (invalid key)")
-                            return@async emptyList()
+                    val accessKey = BuildConfig.UNSPLASH_ACCESS_KEY
+                    if (!isValidApiKey(accessKey)) {
+                        Log.w(TAG, "Unsplash: skipped (invalid key)")
+                        Result.success(emptyList())
+                    } else {
+                        try {
+                            val response = unsplashApi.searchPhotos(
+                                authorization = "Client-ID $accessKey",
+                                query = searchQuery,
+                                page = page,
+                                perPage = 15
+                            )
+                            Log.d(TAG, "Unsplash: loaded ${response.results.size} wallpapers")
+                            Result.success(response.results.map { it.toWallpaper() })
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Unsplash: failed - ${e.message}")
+                            Result.failure(e)
                         }
-                        val response = unsplashApi.searchPhotos(
-                            authorization = "Client-ID $accessKey",
-                            query = searchQuery,
-                            page = page,
-                            perPage = 15
-                        )
-                        Log.d(TAG, "Unsplash: loaded ${response.results.size} wallpapers")
-                        response.results.map { it.toWallpaper() }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Unsplash: failed - ${e.message}")
-                        emptyList()
                     }
                 }
 
@@ -90,6 +99,19 @@ class MergedWallpaperPagingSource(
                     pexelsDeferred.await(),
                     unsplashDeferred.await()
                 )
+            }
+
+            val sources = results.mapNotNull { it.getOrNull() }
+            val hasData = sources.any { it.isNotEmpty() }
+
+            // If we gathered no data and at least one source actually errored, surface the
+            // error so the UI can show a retry instead of a fake "no wallpapers" empty
+            // state. This also un-hides Pexels/Unsplash key-quota exhaustion in production.
+            if (!hasData && results.any { it.isFailure }) {
+                val error = results.firstNotNullOfOrNull { it.exceptionOrNull() }
+                    ?: Exception("Failed to load wallpapers")
+                Log.e(TAG, "All sources failed with no data: ${error.message}", error)
+                return LoadResult.Error(error)
             }
 
             // Round-robin interleave results from all sources
@@ -109,6 +131,8 @@ class MergedWallpaperPagingSource(
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = if (merged.isEmpty()) null else page + 1
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Merged load failed: ${e.message}", e)
             LoadResult.Error(e)

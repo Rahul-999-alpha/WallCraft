@@ -44,18 +44,22 @@ Ads are only preloaded AFTER the SDK init callback fires (fixed in v1.0.5).
 
 ### Ad Unit IDs
 
-Both debug and release builds use the same production IDs from `local.properties`:
+Release builds read the production IDs from `local.properties` (redacted here — do not commit the
+real publisher/app/unit IDs to the repo). Debug builds use Google's public test IDs.
 
 ```
-ADMOB_APP_ID            = ca-app-pub-6988898499933953~6742917290
-ADMOB_BANNER_ID         = ca-app-pub-6988898499933953/856008435
-ADMOB_INTERSTITIAL_ID   = ca-app-pub-6988898499933953/9568987653
-ADMOB_REWARDED_ID       = ca-app-pub-6988898499933953/4620839342
-ADMOB_NATIVE_ID         = ca-app-pub-6988898499933953/9496568560
-ADMOB_APP_OPEN_ID       = ca-app-pub-6988898499933953/8255905989
+# Production (release) — values live in local.properties, kept out of git:
+ADMOB_APP_ID            = ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+ADMOB_BANNER_ID         = ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_INTERSTITIAL_ID   = ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_REWARDED_ID       = ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_NATIVE_ID         = ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_APP_OPEN_ID       = ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 ```
 
-Previously, debug builds used Google test IDs (`ca-app-pub-3940256099942544/...`), which caused test ads to appear for real users receiving debug-signed APKs. Fixed in v1.0.5-patch1.
+Debug builds use Google's public test ad unit IDs (`ca-app-pub-3940256099942544/...`) plus
+`RequestConfiguration.setTestDeviceIds`, so development traffic never touches the production ad
+account. Debug builds are for development only and must not be distributed to users.
 
 ---
 

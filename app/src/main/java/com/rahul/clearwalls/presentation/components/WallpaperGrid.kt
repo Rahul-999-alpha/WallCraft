@@ -2,15 +2,19 @@ package com.rahul.clearwalls.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -55,13 +59,21 @@ fun WallpaperGrid(
             }
             is LoadState.Error -> {
                 val error = (wallpapers.loadState.refresh as LoadState.Error).error
-                Text(
-                    text = error.localizedMessage ?: "An error occurred",
-                    color = MaterialTheme.colorScheme.error,
+                Column(
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(16.dp)
-                )
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = error.localizedMessage ?: "Couldn't load wallpapers",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(onClick = { wallpapers.retry() }) {
+                        Text("Retry")
+                    }
+                }
             }
             else -> {
                 if (wallpapers.itemCount == 0) {

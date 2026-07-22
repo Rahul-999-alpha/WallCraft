@@ -144,6 +144,8 @@ class WallpaperDetailViewModel @Inject constructor(
             _isLoading.value = true
             downloadWallpaperUseCase(url, "clearwalls_${wp.id}_${quality.label}")
                 .onSuccess {
+                    // Report the download to the source provider where required (Unsplash guideline).
+                    wallpaperRepository.trackDownload(wp)
                     _events.emit(DetailEvent.WallpaperDownloaded)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper saved to gallery!"))
                     downloadCount++

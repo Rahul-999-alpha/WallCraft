@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdOptions
 import com.google.android.gms.ads.nativead.NativeAdView
 import com.rahul.clearwalls.BuildConfig
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val TAG = "NativeAdCard"
 
@@ -39,12 +39,9 @@ fun NativeAdCard(
     modifier: Modifier = Modifier
 ) {
     var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            nativeAd?.destroy()
-        }
-    }
+    // Guards the race where a load completes after this grid slot has scrolled away and been
+    // released — without it the callback reassigns nativeAd on a disposed slot and leaks it.
+    val isDisposed = remember { AtomicBoolean(false) }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -57,6 +54,11 @@ fun NativeAdCard(
 
                 val adLoader = AdLoader.Builder(context, BuildConfig.ADMOB_NATIVE_ID)
                     .forNativeAd { ad ->
+                        if (isDisposed.get()) {
+                            // Slot already left composition — destroy immediately, don't leak.
+                            ad.destroy()
+                            return@forNativeAd
+                        }
                         Log.d(TAG, "[NATIVE] Loaded: ${ad.headline}")
                         nativeAd?.destroy()
                         nativeAd = ad
@@ -199,6 +201,13 @@ fun NativeAdCard(
                 adLoader.loadAd(AdRequest.Builder().build())
                 Log.d(TAG, "[NATIVE] Loading...")
                 adView
+            },
+            onRelease = {
+                // Destroy the ad when the view leaves composition; grid slots re-enter
+                // composition on every scroll-past, so leaking here compounds quickly.
+                isDisposed.set(true)
+                nativeAd?.destroy()
+                nativeAd = null
             },
             modifier = Modifier
                 .fillMaxWidth()

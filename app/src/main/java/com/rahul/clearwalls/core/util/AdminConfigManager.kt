@@ -76,6 +76,9 @@ class AdminConfigManager @Inject constructor(
         prefs[KEY_ADMIN_AUTHENTICATED] ?: false
     }
 
+    // NON-AUTHORITATIVE: a local DataStore boolean set by the DEBUG-only admin panel for
+    // testing. Anyone can flip it on a rooted device, so it must never gate a real paid
+    // entitlement — enforce paid access with Play Billing + server-side verification.
     val premiumEnabled: Flow<Boolean> = dataStore.data.map { prefs ->
         prefs[KEY_PREMIUM_ENABLED] ?: false
     }

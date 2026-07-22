@@ -11,9 +11,9 @@
 ### 20. Admin Password Hash Wrong - FIXED
 **File:** `Constants.kt`
 
-**Root Cause:** `ADMIN_PASSWORD_HASH` was `a0f3285b...` but the actual SHA-256 of "clearwalls2024" is `c9a2892b...`. The hash was incorrect from the start.
+**Root Cause:** `ADMIN_PASSWORD_HASH` did not match the SHA-256 of the intended admin password, so authentication always failed. The hash was incorrect from the start.
 
-**Fix:** Replaced with the correct SHA-256 hash.
+**Fix:** Replaced with the correct SHA-256 hash. (Security note: that credential was later exposed in git history and must be rotated; the admin panel is now DEBUG-only.)
 
 ---
 
@@ -241,15 +241,16 @@ minSdk = 26
 targetSdk = 35
 ```
 
-### AdMob IDs (from local.properties)
-Both debug and release use the same real production IDs:
+### AdMob IDs
+Release reads production IDs from `local.properties` (redacted below — kept out of git).
+Debug uses Google's public test IDs.
 ```
-ADMOB_APP_ID=ca-app-pub-6988898499933953~6742917290
-ADMOB_BANNER_ID=ca-app-pub-6988898499933953/856008435
-ADMOB_INTERSTITIAL_ID=ca-app-pub-6988898499933953/9568987653
-ADMOB_REWARDED_ID=ca-app-pub-6988898499933953/4620839342
-ADMOB_NATIVE_ID=ca-app-pub-6988898499933953/9496568560
-ADMOB_APP_OPEN_ID=ca-app-pub-6988898499933953/8255905989
+ADMOB_APP_ID=ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX
+ADMOB_BANNER_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_INTERSTITIAL_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_REWARDED_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_NATIVE_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
+ADMOB_APP_OPEN_ID=ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX
 ```
 
 ---

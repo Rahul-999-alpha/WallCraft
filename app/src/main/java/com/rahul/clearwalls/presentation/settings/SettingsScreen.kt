@@ -230,10 +230,14 @@ fun SettingsScreen(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .clickable {
-                        adminTapCount++
-                        if (adminTapCount >= Constants.ADMIN_TAP_COUNT) {
-                            adminTapCount = 0
-                            onAdminNavigate()
+                        // Admin panel is a DEBUG-only development tool; the hidden reveal
+                        // gesture is inert in release builds.
+                        if (com.rahul.clearwalls.BuildConfig.DEBUG) {
+                            adminTapCount++
+                            if (adminTapCount >= Constants.ADMIN_TAP_COUNT) {
+                                adminTapCount = 0
+                                onAdminNavigate()
+                            }
                         }
                     }
             ) {

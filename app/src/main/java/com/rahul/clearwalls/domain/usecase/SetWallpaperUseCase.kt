@@ -9,17 +9,18 @@ import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.IOException
-import java.net.URL
 import javax.inject.Inject
-import kotlin.math.min
 
 enum class WallpaperTarget {
     HOME, LOCK, BOTH
 }
 
 class SetWallpaperUseCase @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val okHttpClient: OkHttpClient
 ) {
     companion object {
         private const val TAG = "SetWallpaper"
@@ -34,37 +35,39 @@ class SetWallpaperUseCase @Inject constructor(
 
                 val wallpaperManager = WallpaperManager.getInstance(context)
 
-                // Download and decode bitmap
-                val inputStream = try {
-                    URL(imageUrl).openStream()
+                // Download once via OkHttp (inherits configured connect/read timeouts). The
+                // previous code opened the URL twice (bounds + decode) with no timeout; we now
+                // decode both passes from the same in-memory bytes.
+                val bytes = try {
+                    val request = Request.Builder().url(imageUrl).get().build()
+                    okHttpClient.newCall(request).execute().use { response ->
+                        if (!response.isSuccessful) {
+                            return@withContext Result.failure(
+                                IOException("Failed to download image: HTTP ${response.code}")
+                            )
+                        }
+                        response.body?.bytes()
+                            ?: return@withContext Result.failure(IOException("Empty response body"))
+                    }
                 } catch (e: IOException) {
-                    Log.e(TAG, "Failed to open connection to image URL", e)
+                    Log.e(TAG, "Failed to download image", e)
                     return@withContext Result.failure(
                         IOException("Failed to download image: ${e.message}")
                     )
                 }
 
-                // Decode with size limits to avoid OOM
-                bitmap = inputStream.use { stream ->
-                    val options = BitmapFactory.Options().apply {
-                        inJustDecodeBounds = true
-                    }
-
-                    // First, get dimensions
-                    BitmapFactory.decodeStream(stream, null, options)
-
-                    // Calculate sample size if image is too large
-                    val scale = calculateSampleSize(options.outWidth, options.outHeight)
-
-                    // Re-open stream and decode with sample size
-                    URL(imageUrl).openStream().use { retryStream ->
-                        val decodeOptions = BitmapFactory.Options().apply {
-                            inSampleSize = scale
-                            inPreferredConfig = Bitmap.Config.ARGB_8888
-                        }
-                        BitmapFactory.decodeStream(retryStream, null, decodeOptions)
-                    }
+                // Decode with size limits to avoid OOM.
+                val boundsOptions = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
                 }
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size, boundsOptions)
+
+                val scale = calculateSampleSize(boundsOptions.outWidth, boundsOptions.outHeight)
+                val decodeOptions = BitmapFactory.Options().apply {
+                    inSampleSize = scale
+                    inPreferredConfig = Bitmap.Config.ARGB_8888
+                }
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOptions)
 
                 if (bitmap == null) {
                     Log.e(TAG, "Failed to decode bitmap")
