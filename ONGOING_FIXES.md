@@ -50,9 +50,14 @@ installed base to extract from.
 `PRIVACY_POLICY_URL` required at release build time (requireKey); versionCode 9 /
 versionName 1.0.8; UMP dependency added.
 
-### NOT verified in this pass
-No Android SDK on the authoring machine — **compile + on-device checklist in
-PUBLISHING.md §5 must be run in Android Studio before any upload.**
+### Verification status (updated 2026-07-22, same day)
+CLI toolchain (JDK 17 + SDK 35) installed via Homebrew — no Android Studio
+required. Verified: `testDebugUnitTest` 3/3 pass, `assembleDebug` clean,
+`bundleRelease` (R8 + upload-key signing) clean. Still pending: on-device manual
+checklist (PUBLISHING.md §5) and the real Firebase project (`setup_firebase.sh`)
+— all historical builds, including distributed v1.0.x APKs, used a PLACEHOLDER
+google-services.json, so Firestore/Analytics/Crashlytics have never actually
+worked in production.
 
 ---
 

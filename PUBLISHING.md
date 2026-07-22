@@ -9,34 +9,54 @@ API-36 + AGP bump as the first post-launch update (see §9).
 
 ---
 
-## 1. Restore the build environment  [BLOCKER]
+## 1. Build environment — DONE on this Mac (2026-07-22)
 
-This repo currently builds on a machine with:
-- Android Studio (SDK 35, JDK 17)
-- `app/google-services.json` — download from Firebase console → Project settings
-- `keystore/clearwalls.jks` — recover from the old machine/backup, or generate a
-  new one (README §Setup); for a NEW Play app this is fine because Play App
-  Signing holds the real signing key and your keystore is just the upload key
-- `local.properties` — copy `local.properties.template`; fill keystore block,
-  the 6 AdMob IDs, and `PRIVACY_POLICY_URL`. Leave Pexels/Unsplash/Stability blank.
+No Android Studio needed; everything runs through `./gradlew` from the terminal:
+- JDK 17 (Homebrew `openjdk@17`) + Android SDK 35 (`android-commandlinetools`)
+  installed; `sdk.dir` set in `local.properties`
+- `keystore/clearwalls.jks` — freshly generated upload key (Play App Signing
+  holds the real key). **Back up the .jks and the passwords in
+  `local.properties` — both are gitignored and exist only on this machine.**
+- 6 production AdMob IDs recovered from repo history into `local.properties`
+- `app/google-services.json` — currently a compile-only PLACEHOLDER (the app has
+  never had a real Firebase project; all historical builds used a placeholder
+  too). Replace via §2 before building the final AAB.
 
-## 2. Seed the catalog  [BLOCKER]
+Verified from CLI: `testDebugUnitTest` (3/3), `assembleDebug`, `bundleRelease`
+(R8 + signing).
 
-The app now serves ONLY your own Firebase content (Pexels/Unsplash are
-disconnected — their API terms prohibit wallpaper apps). Without seeding, the
-home feed is empty.
+## 2. Create the real Firebase project + seed the catalog  [BLOCKER]
 
-Follow `tools/seed_wallpapers/README.md`: generate → curate by hand → upload →
-deploy `firestore.rules` + `storage.rules`. Target at least ~150 curated
-wallpapers across the 12 categories for a credible first impression.
+The app serves ONLY your own Firebase content (Pexels/Unsplash are disconnected —
+their API terms prohibit wallpaper apps). Without this section, the home feed is
+empty and Crashlytics/Analytics are dead.
+
+```bash
+firebase login                       # one-time browser auth (CLI already installed)
+cd tools/seed_wallpapers
+./setup_firebase.sh clearwalls-app   # creates project + android app, writes REAL
+                                     # app/google-services.json, Firestore + rules
+```
+
+Storage requires the Blaze plan for new projects (no-cost allowances still apply
+— effectively ₹0 at this app's scale): upgrade in the console, deploy
+`storage.rules`, then seed per `tools/seed_wallpapers/README.md`. Target ~150
+curated wallpapers across the 12 categories.
 
 ## 3. Host the privacy policy  [BLOCKER]
 
-1. Edit `docs/privacy-policy.html`: replace `CONTACT_EMAIL_HERE`.
-2. Host it (Cloudflare Pages static upload is the path of least resistance given
-   your existing CF setup; GitHub Pages also works).
-3. Put the final URL in `local.properties` → `PRIVACY_POLICY_URL` and later in
-   Play Console → App content → Privacy policy.
+`docs/privacy-policy.html` is ready (contact email set). The repo is public, so
+GitHub Pages can serve it directly — enable it (Settings → Pages → Deploy from
+branch → `master` + `/docs`, or):
+
+```bash
+gh api repos/Rahul-999-alpha/WallCraft/pages -X POST \
+  -F "source[branch]=master" -F "source[path]=/docs"
+```
+
+URL: `https://rahul-999-alpha.github.io/WallCraft/privacy-policy.html` — put it
+in `local.properties` → `PRIVACY_POLICY_URL` (currently `PENDING`) and later in
+Play Console → App content → Privacy policy.
 
 ## 4. AdMob console  [BLOCKER]
 
@@ -50,14 +70,10 @@ wallpapers across the 12 categories for a credible first impression.
 
 ## 5. Verify on a device / emulator  [BLOCKER]
 
-Nothing in this release has been compile-verified (this machine has no Android
-SDK). In Android Studio:
-
-```
-./gradlew :app:compileDebugKotlin      # must compile clean
-./gradlew :app:testDebugUnitTest       # PromptModerationTest must pass
-./gradlew assembleDebug                # install on device/emulator
-```
+Compile + unit tests + R8 release pipeline are already verified from the CLI
+(2026-07-22). What remains is the on-device pass — install
+`app/build/outputs/apk/debug/app-debug.apk` on any phone/emulator
+(`adb install`), AFTER §2 so the catalog isn't empty.
 
 Manual pass (debug build):
 - [ ] First launch: UMP consent form appears (debug geography forces EEA); after
