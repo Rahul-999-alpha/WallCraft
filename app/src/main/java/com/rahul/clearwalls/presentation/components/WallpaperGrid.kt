@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import com.rahul.clearwalls.core.common.Constants
+import com.rahul.clearwalls.core.util.AdTuning
 import com.rahul.clearwalls.domain.model.Wallpaper
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,7 +99,7 @@ fun WallpaperGrid(
                             verticalItemSpacing = 8.dp,
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            val adInterval = Constants.AD_INLINE_INTERVAL
+                            val adInterval = AdTuning.inlineInterval
                             val wpCount = wallpapers.itemCount
                             val numAds = if (wpCount > adInterval) wpCount / adInterval else 0
                             val totalItems = wpCount + numAds

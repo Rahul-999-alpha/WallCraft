@@ -34,3 +34,5 @@ tools/seed_wallpapers/hosting_public/
 tools/seed_wallpapers/firebase-debug.log
 .firebaserc
 firebase-debug.log
+.kotlin/
+tools/seed_wallpapers/.firebase/

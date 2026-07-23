@@ -12,8 +12,8 @@ import com.rahul.clearwalls.domain.usecase.SetWallpaperUseCase
 import com.rahul.clearwalls.domain.usecase.ToggleFavoriteUseCase
 import com.rahul.clearwalls.domain.usecase.WallpaperTarget
 import android.util.Log
-import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.core.util.AdManager
+import com.rahul.clearwalls.core.util.AdTuning
 import com.rahul.clearwalls.data.repository.ReportRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -118,8 +118,8 @@ class WallpaperDetailViewModel @Inject constructor(
 
     private fun shouldShowInterstitial(count: Int, interval: Int): Boolean {
         val now = System.currentTimeMillis()
-        if (now - sessionStart < Constants.AD_FIRST_SESSION_GRACE_MS) return false
-        if (now - lastInterstitialTime < Constants.AD_INTERSTITIAL_COOLDOWN_MS) return false
+        if (now - sessionStart < AdTuning.firstSessionGraceMs) return false
+        if (now - lastInterstitialTime < AdTuning.interstitialCooldownMs) return false
         return count % interval == 0
     }
 
@@ -138,7 +138,7 @@ class WallpaperDetailViewModel @Inject constructor(
                     _events.emit(DetailEvent.WallpaperSet)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper set successfully!"))
                     setWallpaperCount++
-                    if (shouldShowInterstitial(setWallpaperCount, Constants.AD_INTERSTITIAL_SET_INTERVAL)) {
+                    if (shouldShowInterstitial(setWallpaperCount, AdTuning.interstitialSetInterval)) {
                         _events.emit(DetailEvent.ShowInterstitial)
                     }
                 }
@@ -166,7 +166,7 @@ class WallpaperDetailViewModel @Inject constructor(
                     _events.emit(DetailEvent.WallpaperDownloaded)
                     _events.emit(DetailEvent.ShowMessage("Wallpaper saved to gallery!"))
                     downloadCount++
-                    if (shouldShowInterstitial(downloadCount, Constants.AD_INTERSTITIAL_DOWNLOAD_INTERVAL)) {
+                    if (shouldShowInterstitial(downloadCount, AdTuning.interstitialDownloadInterval)) {
                         _events.emit(DetailEvent.ShowInterstitial)
                     }
                 }

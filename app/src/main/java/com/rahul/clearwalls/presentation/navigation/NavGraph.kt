@@ -11,7 +11,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.rahul.clearwalls.presentation.admin.AdminScreen
 import com.rahul.clearwalls.presentation.aigenerate.AiGenerateScreen
 import com.rahul.clearwalls.presentation.browse.BrowseScreen
 import com.rahul.clearwalls.presentation.detail.WallpaperDetailScreen
@@ -139,20 +138,8 @@ fun NavGraph(
 
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onBackClick = { navController.popBackStack() },
-                onAdminNavigate = {
-                    navController.navigate(Screen.Admin.route)
-                }
+                onBackClick = { navController.popBackStack() }
             )
-        }
-
-        // Admin panel is a DEBUG-only development tool; the route is not registered in release.
-        if (com.rahul.clearwalls.BuildConfig.DEBUG) {
-            composable(Screen.Admin.route) {
-                AdminScreen(
-                    onBackClick = { navController.popBackStack() }
-                )
-            }
         }
     }
 }

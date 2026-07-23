@@ -178,12 +178,15 @@ test IDs; release builds read production IDs from `local.properties`. UMP consen
 is gathered before any ad request (see `ConsentManager`); banner/native components
 render nothing until `AdManager.adsEnabled` is true.
 
-| Ad Type | Placement | Frequency (v1.0.8, retention-first) |
-|---------|-----------|-------------------------------------|
+All frequencies are server-tunable without an app update via Firebase Remote
+Config (`core/util/AdTuning.kt` — parameter names, defaults, and floor clamps).
+
+| Ad Type | Placement | Launch default |
+|---------|-----------|----------------|
 | **Banner** | Bottom of Home/Browse/Favorites | Persistent (adaptive width) |
 | **Interstitial** | After wallpaper actions | Every 4th download / 4th set, 3-min cooldown |
 | **Rewarded** | AI Generate (credits) + 4K download | On-demand |
-| **Native** | Wallpaper grid | Every 10 items (full-width card) |
+| **Native** | Wallpaper grid | Every 8 items (full-width card) |
 | **App Open** | App resume from background | 4-hour cooldown, 10-min first-session grace |
 
 ### Ad System Architecture
@@ -208,7 +211,6 @@ adb logcat | grep -E "AdManager|AdBanner|ClearWallsApp|NATIVE"
 5. **AI Generate** - Pollinations.ai wallpaper generation with rewarded ads
 6. **Wallpaper Detail** - Preview, zoom, download, set, share
 7. **Settings** - Theme, image quality, data saver, auto wallpaper
-8. **Admin Panel** - Hidden configuration (7 taps on logo + password)
 
 ---
 
@@ -239,7 +241,7 @@ Purple gradient mountains with warm sunset tones:
 
 ## Changelog
 
-### v1.0.8 (2026-07-22) — Play Store publish prep
+### v1.0.8 (2026-07-22/23) — Play Store publish prep
 - **Content pivot:** catalog now served from owned Firebase collections
   (`CuratedFirestorePagingSource`); Pexels/Unsplash disconnected (their API terms
   prohibit wallpaper apps). Seeder tool added at `tools/seed_wallpapers/`.
@@ -256,6 +258,9 @@ Purple gradient mountains with warm sunset tones:
 - **Privacy:** `docs/privacy-policy.html` + required `PRIVACY_POLICY_URL`
   (release build fails without it); privacy policy link in Settings.
 - **Docs:** `PUBLISHING.md` Play Console runbook.
+- **Removed:** admin panel (inert config, hidden-feature review risk); ad
+  frequencies are now server-tunable via Firebase Remote Config (`AdTuning`,
+  floor-clamped) — the operational control the panel pretended to be.
 
 ### v1.0.7 (2026-03-10)
 - **Fixed:** Admin password hash (wrong SHA-256 value)
@@ -318,7 +323,6 @@ Purple gradient mountains with warm sunset tones:
 - Full AdMob integration (5 ad types including native grid cards)
 - Theme system (Light/Dark/AMOLED/System)
 - Auto wallpaper changer with WorkManager
-- Admin panel
 
 ### Planned
 - API 36 / AGP 8.9+ toolchain bump (required before 31 Aug 2026 — see PUBLISHING.md §9)

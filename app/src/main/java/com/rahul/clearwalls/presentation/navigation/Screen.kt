@@ -32,7 +32,6 @@ sealed class Screen(val route: String) {
     data object AiGenerate : Screen("ai_generate")
     data object Favorites : Screen("favorites")
     data object Settings : Screen("settings")
-    data object Admin : Screen("admin")
 }
 
 data class BottomNavItem(

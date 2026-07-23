@@ -50,6 +50,18 @@ installed base to extract from.
 `PRIVACY_POLICY_URL` required at release build time (requireKey); versionCode 9 /
 versionName 1.0.8; UMP dependency added.
 
+### 32. Admin Panel Deleted; Ad Knobs Moved to Remote Config (2026-07-23)
+Admin panel removed entirely (AdminScreen/AdminViewModel/AdminConfigManager,
+route, reveal gesture, constants) — it was inert (nothing read its config), a
+hidden-feature risk for Play review, and its old password plaintext was exposed
+in public git history. Replacement: `core/util/AdTuning.kt` — ad frequencies
+(inline interval, interstitial set/download intervals, cooldown, first-session
+grace) read from Firebase Remote Config with in-code defaults (8/4/4/180s/600s)
+and hard floors so console typos can't create an ad-storm. Change fleet-wide
+from Firebase console → Remote Config, no app update. `AdManager.isPremium`
+seam retained for a future Play Billing "remove ads" purchase. Unit tests:
+AdTuningTest (fallback + clamping).
+
 ### Verification status (updated 2026-07-22, same day)
 CLI toolchain (JDK 17 + SDK 35) installed via Homebrew — no Android Studio
 required. Verified: `testDebugUnitTest` 3/3 pass, `assembleDebug` clean,

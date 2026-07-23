@@ -79,12 +79,9 @@ class AdManager @Inject constructor(
         val isPremium: Boolean           = false,
     )
 
-    // Ads are always enabled and non-premium by default. The previous updateConfig()/
-    // updatePremiumState() setters had zero callers (the DEBUG-only admin panel writes its
-    // config to DataStore but nothing fed it here), so they were dead code and were removed
-    // to avoid implying a live control that never existed. If per-user premium/ad-frequency
-    // control is ever needed, wire AdminConfigManager (or Play Billing) into this field
-    // deliberately rather than reviving unused setters.
+    // Ads are always enabled and non-premium. isPremium is the seam a future Play
+    // Billing "remove ads" purchase flips — nothing else may write it. Ad frequencies
+    // are server-tunable via AdTuning (Remote Config); the admin panel was deleted.
     @Volatile private var adConfig = AdConfig()
 
     // ── Activity tracking ────────────────────────────────────────────────────

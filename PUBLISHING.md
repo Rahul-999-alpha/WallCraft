@@ -125,9 +125,10 @@ Manual pass (debug build):
 
 - **Content**: catalog = owned Firestore collections + AI generation. Pexels/
   Unsplash code remains but is disconnected; do NOT re-enable for a store build.
-- **Ad load**: 10-min first-session grace, native every 10 tiles, interstitial
-  every 4th action with 3-min cooldown, notifications daily. Tighten only with
-  retention data (Firebase Analytics day-1/day-7) — not before.
+- **Ad load**: server-tunable via Remote Config (`AdTuning`): defaults are 10-min
+  first-session grace, native every 8 tiles, interstitial every 4th action with
+  3-min cooldown; notifications daily. Tighten from the Firebase console only
+  with retention data (day-1/day-7) — every knob is floor-clamped in code.
 - **Consent**: UMP gathers consent before any ad request; banners/native render
   nothing until `AdManager.adsEnabled` flips.
 - **AI safety**: client blocklist (`PromptModeration`) + Pollinations `safe=true`
@@ -137,8 +138,8 @@ Manual pass (debug build):
 
 - Bump AGP 8.7.3 → 8.9.1+ (Gradle wrapper accordingly), compileSdk/targetSdk 36,
   re-test, ship as 1.0.9. This is mandatory to keep updating past 31 Aug 2026.
-- Rotate `ADMIN_PASSWORD_HASH` (plaintext of the current one is in git history;
-  panel is DEBUG-only so it's not shipping, but rotate anyway).
+- (Admin panel deleted 2026-07-23 — ad knobs live on Remote Config via AdTuning;
+  change them in Firebase console -> Remote Config, no app update needed.)
 - Candidate revenue lever once retention is known: one-time "Remove ads" IAP via
   Play Billing (AdManager already has the `isPremium` seam).
 

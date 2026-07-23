@@ -25,14 +25,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.domain.model.ImageQuality
 import com.rahul.clearwalls.presentation.theme.ThemeMode
 
@@ -40,7 +38,6 @@ import com.rahul.clearwalls.presentation.theme.ThemeMode
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
-    onAdminNavigate: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val imageQuality by viewModel.imageQuality.collectAsState()
@@ -51,8 +48,6 @@ fun SettingsScreen(
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
-
-    var adminTapCount by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
@@ -268,7 +263,7 @@ fun SettingsScreen(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            // About - with hidden admin access
+            // About
             Text(
                 text = "About",
                 style = MaterialTheme.typography.titleMedium,
@@ -276,19 +271,7 @@ fun SettingsScreen(
                 modifier = Modifier.padding(16.dp)
             )
             Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .clickable {
-                        // Admin panel is a DEBUG-only development tool; the hidden reveal
-                        // gesture is inert in release builds.
-                        if (com.rahul.clearwalls.BuildConfig.DEBUG) {
-                            adminTapCount++
-                            if (adminTapCount >= Constants.ADMIN_TAP_COUNT) {
-                                adminTapCount = 0
-                                onAdminNavigate()
-                            }
-                        }
-                    }
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
                 Text("ClearWalls v${com.rahul.clearwalls.BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(4.dp))

@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.rahul.clearwalls.core.common.Constants
+import com.rahul.clearwalls.core.util.AdTuning
 import com.rahul.clearwalls.domain.model.Wallpaper
 import com.rahul.clearwalls.presentation.components.AdBanner
 import com.rahul.clearwalls.presentation.components.NativeAdCard
@@ -112,7 +112,7 @@ fun HomeScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { padding ->
         // Wallpaper grid item counts (for ad interleaving)
-        val adInterval = Constants.AD_INLINE_INTERVAL
+        val adInterval = AdTuning.inlineInterval
         val wpCount = wallpapers.itemCount
         val numAds = if (wpCount > adInterval) wpCount / adInterval else 0
         val totalWpItems = wpCount + numAds

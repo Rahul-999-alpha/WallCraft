@@ -14,8 +14,10 @@ import androidx.work.WorkManager
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.rahul.clearwalls.core.common.Constants
 import com.rahul.clearwalls.core.util.AdManager
+import com.rahul.clearwalls.core.util.AdTuning
 import com.rahul.clearwalls.worker.NewWallpaperNotificationWorker
 import com.rahul.clearwalls.worker.WallpaperRefreshWorker
 import dagger.hilt.android.HiltAndroidApp
@@ -53,6 +55,13 @@ class ClearWallsApp : android.app.Application(), Configuration.Provider {
 
         // NOTE: MobileAds is intentionally NOT initialised here. UMP consent must be
         // gathered first (MainActivity), which then calls initializeMobileAdsSdk().
+
+        // Ad-frequency knobs are server-tunable (see AdTuning). Defaults apply
+        // immediately; overrides land on the next fetch (12h cadence + cold start).
+        FirebaseRemoteConfig.getInstance().apply {
+            setDefaultsAsync(AdTuning.DEFAULTS)
+            fetchAndActivate()
+        }
 
         scheduleWallpaperRefresh()
         scheduleNotificationWorker()
