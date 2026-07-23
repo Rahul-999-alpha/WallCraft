@@ -138,7 +138,8 @@ def generate(categories, per_category, sleep_s):
         display, pinned, templates = CATEGORIES[cat]
         cat_dir = OUTPUT_DIR / cat
         cat_dir.mkdir(parents=True, exist_ok=True)
-        existing = len(list(cat_dir.glob("*.jpg")))
+        # Count full images only — thumbs would double the count and stall top-ups.
+        existing = len([p for p in cat_dir.glob("*.jpg") if not p.name.endswith("_thumb.jpg")])
         needed = max(0, per_category - existing)
         print(f"[{cat}] have {existing}, generating {needed} more")
 
@@ -184,14 +185,45 @@ def generate(categories, per_category, sleep_s):
     print(f"\nDone. Now CURATE: delete rejects from {OUTPUT_DIR}/<category>/ then run upload.")
 
 
-def upload(service_account, bucket_name, picks):
+def stage_hosting():
+    """Builds hosting_public/ for `firebase deploy --only hosting`: curated images
+    under /wallpapers/<category>/, plus the privacy policy at the site root.
+    Firebase Hosting works on the no-cost Spark plan (10 GB storage, 360 MB/day
+    transfer) — enough for closed testing and early launch without Blaze."""
+    import shutil
+
+    staging = Path(__file__).parent / "hosting_public"
+    if staging.exists():
+        shutil.rmtree(staging)
+    count = 0
+    for img in OUTPUT_DIR.glob("*/*.jpg"):
+        dest = staging / "wallpapers" / img.parent.name / img.name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(img, dest)
+        count += 1
+    policy = Path(__file__).parent.parent.parent / "docs" / "privacy-policy.html"
+    if policy.exists():
+        shutil.copy2(policy, staging / "privacy-policy.html")
+    (staging / "index.html").write_text(
+        '<!DOCTYPE html><meta charset="utf-8"><title>ClearWalls</title>'
+        '<p>ClearWalls content host. <a href="privacy-policy.html">Privacy policy</a></p>'
+    )
+    print(f"Staged {count} files + privacy policy into {staging}")
+    print("Deploy with: firebase deploy --only hosting --project <project-id>")
+
+
+def upload(service_account, bucket_name, picks, hosting_base_url=None):
     import firebase_admin
     from firebase_admin import credentials, firestore, storage
 
     cred = credentials.Certificate(service_account)
-    firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
+    if hosting_base_url:
+        firebase_admin.initialize_app(cred)
+        bucket = None
+    else:
+        firebase_admin.initialize_app(cred, {"storageBucket": bucket_name})
+        bucket = storage.bucket()
     db = firestore.client()
-    bucket = storage.bucket()
 
     manifest = json.loads((OUTPUT_DIR / "catalog.json").read_text())
     uploaded = []
@@ -212,9 +244,15 @@ def upload(service_account, bucket_name, picks):
         thumb_path = OUTPUT_DIR / cat / f"{wid}_thumb.jpg"
         if not full_path.exists():
             continue  # curated out
-        full_url = upload_blob(full_path, f"wallpapers/{cat}/{wid}.jpg")
-        thumb_url = upload_blob(thumb_path, f"wallpapers/{cat}/{wid}_thumb.jpg") \
-            if thumb_path.exists() else full_url
+        if hosting_base_url:
+            base = hosting_base_url.rstrip("/")
+            full_url = f"{base}/wallpapers/{cat}/{wid}.jpg"
+            thumb_url = f"{base}/wallpapers/{cat}/{wid}_thumb.jpg" \
+                if thumb_path.exists() else full_url
+        else:
+            full_url = upload_blob(full_path, f"wallpapers/{cat}/{wid}.jpg")
+            thumb_url = upload_blob(thumb_path, f"wallpapers/{cat}/{wid}_thumb.jpg") \
+                if thumb_path.exists() else full_url
 
         db.collection("curated_wallpapers").document(wid).set({
             "title": meta["title"],
@@ -280,9 +318,13 @@ def main():
     g.add_argument("--per-category", type=int, default=15)
     g.add_argument("--sleep", type=float, default=6.0, help="seconds between requests (be polite)")
 
-    u = sub.add_parser("upload", help="upload curated output/ to Firebase")
+    sub.add_parser("stage-hosting", help="build hosting_public/ for firebase deploy --only hosting")
+
+    u = sub.add_parser("upload", help="write catalog docs to Firestore (images via Storage or Hosting)")
     u.add_argument("--service-account", required=True, help="path to Firebase service-account JSON")
-    u.add_argument("--bucket", required=True, help="e.g. my-project.appspot.com")
+    u.add_argument("--bucket", help="Storage bucket (omit when using --hosting-base-url)")
+    u.add_argument("--hosting-base-url", help="e.g. https://my-project.web.app — serve images "
+                                              "from Firebase Hosting (Spark plan, no Blaze needed)")
     u.add_argument("--picks", type=int, default=20, help="number of editor picks")
 
     args = p.parse_args()
@@ -292,8 +334,12 @@ def main():
         if unknown:
             sys.exit(f"Unknown categories: {unknown}. Valid: {list(CATEGORIES)}")
         generate(cats, args.per_category, args.sleep)
+    elif args.cmd == "stage-hosting":
+        stage_hosting()
     else:
-        upload(args.service_account, args.bucket, args.picks)
+        if not args.bucket and not args.hosting_base_url:
+            sys.exit("upload needs --bucket or --hosting-base-url")
+        upload(args.service_account, args.bucket, args.picks, args.hosting_base_url)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,16 @@
   "firestore": {
     "rules": "firestore.rules"
   },
-  "storage": {
-    "rules": "storage.rules"
+  "hosting": {
+    "public": "hosting_public",
+    "ignore": ["firebase.json", "**/.*"],
+    "headers": [
+      {
+        "source": "/wallpapers/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      }
+    ]
   }
 }
