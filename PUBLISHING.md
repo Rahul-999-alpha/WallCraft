@@ -18,45 +18,41 @@ No Android Studio needed; everything runs through `./gradlew` from the terminal:
   holds the real key). **Back up the .jks and the passwords in
   `local.properties` — both are gitignored and exist only on this machine.**
 - 6 production AdMob IDs recovered from repo history into `local.properties`
-- `app/google-services.json` — currently a compile-only PLACEHOLDER (the app has
-  never had a real Firebase project; all historical builds used a placeholder
-  too). Replace via §2 before building the final AAB.
+- `app/google-services.json` — REAL config for Firebase project `clearwalls-app`
+  (gitignored; re-fetch any time with
+  `firebase apps:sdkconfig android --project clearwalls-app`)
 
 Verified from CLI: `testDebugUnitTest` (3/3), `assembleDebug`, `bundleRelease`
-(R8 + signing).
+(R8 + signing), jarsigner.
 
-## 2. Create the real Firebase project + seed the catalog  [BLOCKER]
+## 2. Firebase project + catalog — DONE (2026-07-23)
 
-The app serves ONLY your own Firebase content (Pexels/Unsplash are disconnected —
-their API terms prohibit wallpaper apps). Without this section, the home feed is
-empty and Crashlytics/Analytics are dead.
+Live infrastructure (all on the no-cost Spark plan — Storage/Blaze NOT needed):
+- Project `clearwalls-app`; Android app registered (com.rahul.clearwalls)
+- Firestore `(default)` in **asia-south1**, locked-down rules deployed
+  (public read catalog, create-only reports, everything else denied — verified)
+- **144 wallpapers / 12 categories / 20 editor picks** in Firestore; images on
+  Firebase Hosting CDN (`https://clearwalls-app.web.app/wallpapers/...`,
+  immutable cache headers)
+- Service-account key at `tools/seed_wallpapers/serviceAccount.json` (gitignored)
 
-```bash
-firebase login                       # one-time browser auth (CLI already installed)
-cd tools/seed_wallpapers
-./setup_firebase.sh clearwalls-app   # creates project + android app, writes REAL
-                                     # app/google-services.json, Firestore + rules
-```
+Content refresh cadence: `seed.py generate` → curate → `stage-hosting` →
+`firebase deploy --only hosting` → `seed.py upload --hosting-base-url
+https://clearwalls-app.web.app`. Prune bad content by deleting docs in the
+Firestore console (images age out of the next hosting deploy).
 
-Storage requires the Blaze plan for new projects (no-cost allowances still apply
-— effectively ₹0 at this app's scale): upgrade in the console, deploy
-`storage.rules`, then seed per `tools/seed_wallpapers/README.md`. Target ~150
-curated wallpapers across the 12 categories.
+Watch Hosting bandwidth (Spark: 360 MB/day) — at a few thousand DAU move images
+to Blaze Storage or Cloudflare R2 and update the Firestore URLs.
 
-## 3. Host the privacy policy  [BLOCKER]
+Cleanup note: orphan GCP project `clearwalls-rd-2607` (created during a failed
+attach) can be deleted at console.cloud.google.com.
 
-`docs/privacy-policy.html` is ready (contact email set). The repo is public, so
-GitHub Pages can serve it directly — enable it (Settings → Pages → Deploy from
-branch → `master` + `/docs`, or):
+## 3. Privacy policy — LIVE
 
-```bash
-gh api repos/Rahul-999-alpha/WallCraft/pages -X POST \
-  -F "source[branch]=master" -F "source[path]=/docs"
-```
-
-URL: `https://rahul-999-alpha.github.io/WallCraft/privacy-policy.html` — put it
-in `local.properties` → `PRIVACY_POLICY_URL` (currently `PENDING`) and later in
-Play Console → App content → Privacy policy.
+`https://clearwalls-app.web.app/privacy-policy.html` (served from Firebase
+Hosting; source of truth is `docs/privacy-policy.html` — redeploy hosting after
+edits). Already baked into the v1.0.8 AAB via `PRIVACY_POLICY_URL`; enter the
+same URL in Play Console → App content → Privacy policy.
 
 ## 4. AdMob console  [BLOCKER]
 
@@ -68,12 +64,15 @@ Play Console → App content → Privacy policy.
 3. After the app is live on Play: AdMob → Apps → link to the Play listing, and
    complete app-ads.txt if you attach a developer website.
 
-## 5. Verify on a device / emulator  [BLOCKER]
+## 5. Verify on a device / emulator  [BLOCKER — the last technical gate]
 
-Compile + unit tests + R8 release pipeline are already verified from the CLI
-(2026-07-22). What remains is the on-device pass — install
-`app/build/outputs/apk/debug/app-debug.apk` on any phone/emulator
-(`adb install`), AFTER §2 so the catalog isn't empty.
+Everything server-side is verified (unauthenticated catalog reads return docs,
+writes are denied, images serve from the CDN). What remains is the on-device
+pass — install `app/build/outputs/apk/debug/app-debug.apk` (built against the
+real Firebase project) on any phone: `adb install app-debug.apk`.
+
+The signed Play artifact is attached to the GitHub release:
+https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.8
 
 Manual pass (debug build):
 - [ ] First launch: UMP consent form appears (debug geography forces EEA); after
