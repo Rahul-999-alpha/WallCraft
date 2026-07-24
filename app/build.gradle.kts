@@ -31,7 +31,9 @@ android {
         applicationId = "com.clearwalls"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
+        // versionCode 9 consumed by the first Play upload (2026-07-24); every new
+        // upload needs a strictly higher code.
+        versionCode = 10
         versionName = "1.0.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -95,6 +97,11 @@ android {
             isMinifyEnabled   = true
             isShrinkResources = true
             signingConfig     = signingConfigs.getByName("release") // BUG-001 FIX
+
+            // Embed native debug symbols in the AAB (Play Console warns otherwise).
+            // The only native code is AndroidX's (graphics.path, datastore counter),
+            // but symbolised native crash/ANR stacks are worth the one-time NDK install.
+            ndk { debugSymbolLevel = "SYMBOL_TABLE" }
 
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

@@ -90,6 +90,19 @@ Manual pass (debug build):
       (`apkanalyzer manifest print` or Studio's Merged Manifest tab)
 - [ ] Release build: `./gradlew bundleRelease` succeeds and requireKey() passes
 
+### Known Play Console warning (cosmetic, cannot be fixed)
+
+"This App Bundle contains native code, and you've not uploaded debug symbols" —
+the only native code is AndroidX's (`libandroidx.graphics.path.so`,
+`libdatastore_shared_counter.so`), and Google ships those libraries pre-stripped
+(verified with llvm-readelf: no .symtab/.debug_info), so there are no symbols to
+embed. `ndk.debugSymbolLevel = "SYMBOL_TABLE"` is configured anyway so any future
+dependency that ships unstripped native code gets symbolised automatically.
+Kotlin crash deobfuscation is unaffected (R8 mapping is embedded in the AAB).
+
+versionCode bookkeeping: 9 = first Play upload (2026-07-24); build.gradle is
+already at 10 for the next artifact.
+
 ## 6. Play Console — account and app setup
 
 - New **personal** developer accounts (created after Nov 2023) must run a
