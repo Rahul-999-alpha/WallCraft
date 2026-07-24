@@ -25,16 +25,17 @@ android {
     // (the Play/device identity) — renaming code packages would churn every file for
     // zero user-visible benefit. applicationId is PERMANENT once the Play listing exists.
     namespace = "com.rahul.clearwalls"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.clearwalls"
         minSdk = 26
-        targetSdk = 35
+        // Play requires target 36+ for updates from 31 Aug 2026.
+        targetSdk = 36
         // versionCode 9 consumed by the first Play upload (2026-07-24); every new
         // upload needs a strictly higher code.
         versionCode = 10
-        versionName = "1.0.8"
+        versionName = "1.0.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // DISCONNECTED content APIs — Pexels/Unsplash removed from the release pipeline

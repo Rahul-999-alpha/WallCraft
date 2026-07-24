@@ -63,7 +63,7 @@ app/
 
 | Category | Libraries |
 |----------|-----------|
-| **Core** | Kotlin 1.9, Android SDK 26+ (target 35), Jetpack Compose (BOM 2024.12.01), Material 3 |
+| **Core** | Kotlin 2.1, Android SDK 26+ (target 36, AGP 8.9.3), Jetpack Compose (BOM 2024.12.01), Material 3 |
 | **Architecture** | MVVM, Hilt DI, Coroutines & Flow, StateFlow |
 | **Networking** | Retrofit 2.11, OkHttp 4.12 (with caching), Gson |
 | **Data** | Room 2.6.1, DataStore Preferences, Paging 3 |
@@ -240,6 +240,12 @@ Purple gradient mountains with warm sunset tones:
 ---
 
 ## Changelog
+
+### v1.0.9 (2026-07-24)
+- **Target API 36** (Android 16) + AGP 8.7.3 → 8.9.3 — Play's 31 Aug 2026
+  requirement for app updates; versionCode 10
+- **Native debug symbols** config (`debugSymbolLevel=SYMBOL_TABLE`; today's only
+  native libs are pre-stripped AndroidX, so the Play warning is cosmetic)
 
 ### v1.0.8 (2026-07-22/23) — Play Store publish prep
 - **Content pivot:** catalog now served from owned Firebase collections

@@ -3,9 +3,9 @@
 Everything between here and a live listing, in order. Items marked **[BLOCKER]**
 must be done before uploading anything.
 
-**Hard deadline context:** from **31 Aug 2026** new apps/updates must target
-**API 36**. This release targets 35 (fine if submitted before then). Plan the
-API-36 + AGP bump as the first post-launch update (see §9).
+**Target API status: RESOLVED 2026-07-24.** v1.0.9 (versionCode 10) targets
+**API 36** on AGP 8.9.3 — compliant past the 31 Aug 2026 requirement. The Play
+Console warning clears once a 36-targeting build is released to production.
 
 ---
 
@@ -148,10 +148,11 @@ already at 10 for the next artifact.
 - **AI safety**: client blocklist (`PromptModeration`) + Pollinations `safe=true`
   + in-app reporting to Firestore `reports`.
 
-## 9. First update after launch (target: before 31 Aug 2026)
+## 9. First update after launch
 
-- Bump AGP 8.7.3 → 8.9.1+ (Gradle wrapper accordingly), compileSdk/targetSdk 36,
-  re-test, ship as 1.0.9. This is mandatory to keep updating past 31 Aug 2026.
+- ~~API-36/AGP bump~~ DONE 2026-07-24: AGP 8.9.3, compileSdk/targetSdk 36,
+  v1.0.9 (versionCode 10). Upload this AAB and release to production to clear
+  the Play Console target-API warning.
 - (Admin panel deleted 2026-07-23 — ad knobs live on Remote Config via AdTuning;
   change them in Firebase console -> Remote Config, no app update needed.)
 - Candidate revenue lever once retention is known: one-time "Remove ads" IAP via
