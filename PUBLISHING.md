@@ -28,7 +28,8 @@ Verified from CLI: `testDebugUnitTest` (3/3), `assembleDebug`, `bundleRelease`
 ## 2. Firebase project + catalog — DONE (2026-07-23)
 
 Live infrastructure (all on the no-cost Spark plan — Storage/Blaze NOT needed):
-- Project `clearwalls-app`; Android app registered (com.rahul.clearwalls)
+- Project `clearwalls-app`; Android app registered (**com.clearwalls** — the
+  Play/device identity; code namespace remains com.rahul.clearwalls)
 - Firestore `(default)` in **asia-south1**, locked-down rules deployed
   (public read catalog, create-only reports, everything else denied — verified)
 - **144 wallpapers / 12 categories / 20 editor picks** in Firestore; images on

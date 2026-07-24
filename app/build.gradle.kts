@@ -21,11 +21,14 @@ fun requireKey(key: String): String =
         ?: error("$key is missing or blank in local.properties. Required for release build.")
 
 android {
+    // namespace (code packages, BuildConfig) intentionally differs from applicationId
+    // (the Play/device identity) — renaming code packages would churn every file for
+    // zero user-visible benefit. applicationId is PERMANENT once the Play listing exists.
     namespace = "com.rahul.clearwalls"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.rahul.clearwalls"
+        applicationId = "com.clearwalls"
         minSdk = 26
         targetSdk = 35
         versionCode = 9

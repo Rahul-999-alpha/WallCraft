@@ -135,12 +135,12 @@ app/
 ## Build Variants
 
 ### Debug
-- **App ID:** `com.rahul.clearwalls`
+- **App ID:** `com.clearwalls`
 - Uses real AdMob IDs from `local.properties` (same as release)
 - Debuggable, no obfuscation
 
 ### Release
-- **App ID:** `com.rahul.clearwalls`
+- **App ID:** `com.clearwalls`
 - `requireKey()` validates all AdMob IDs and content API keys at Gradle configuration time
 - R8 minification + resource shrinking enabled
 - ProGuard rules for AdMob, Retrofit, Gson, Coil, Room

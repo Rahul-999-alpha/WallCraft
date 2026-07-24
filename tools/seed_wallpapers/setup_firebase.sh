@@ -16,7 +16,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 PROJECT_ID="${1:-clearwalls-app-$RANDOM}"
-PACKAGE="com.rahul.clearwalls"
+PACKAGE="com.clearwalls"
 REPO_ROOT="$(cd ../.. && pwd)"
 
 echo "==> Creating Firebase project: $PROJECT_ID"
