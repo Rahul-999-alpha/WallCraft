@@ -73,7 +73,7 @@ pass — install `app/build/outputs/apk/debug/app-debug.apk` (built against the
 real Firebase project) on any phone: `adb install app-debug.apk`.
 
 The signed Play artifact is attached to the GitHub release:
-https://github.com/Rahul-999-alpha/WallCraft/releases/tag/v1.0.8
+https://github.com/Rahul-999-alpha/clearwalls/releases/tag/v1.0.8
 
 Manual pass (debug build):
 - [ ] First launch: UMP consent form appears (debug geography forces EEA); after

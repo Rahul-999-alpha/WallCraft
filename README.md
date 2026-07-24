@@ -3,7 +3,7 @@
 <div align="center">
   <img src="Clear walls A1.png" alt="ClearWalls Logo" width="200"/>
 
-  [![Version](https://img.shields.io/badge/version-1.0.7-blue.svg)](https://github.com/Rahul-999-alpha/WallCraft/releases)
+  [![Version](https://img.shields.io/badge/version-1.0.8-blue.svg)](https://github.com/Rahul-999-alpha/clearwalls/releases)
   [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
   [![Android](https://img.shields.io/badge/Android-26%2B-brightgreen.svg)](https://developer.android.com)
   [![Kotlin](https://img.shields.io/badge/Kotlin-1.9-purple.svg)](https://kotlinlang.org)
@@ -86,8 +86,8 @@ app/
 
 1. **Clone the repository:**
    ```bash
-   git clone git@github.com-rahul:Rahul-999-alpha/WallCraft.git
-   cd WallCraft
+   git clone git@github.com-rahul:Rahul-999-alpha/clearwalls.git
+   cd clearwalls
    ```
 
 2. **Create `local.properties`** (copy from template):

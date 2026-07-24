@@ -2,7 +2,7 @@
 
 ## Current Version: v1.0.8 (2026-07-22)
 **Previous Release:** v1.0.7 (2026-03-10)
-**Repository:** https://github.com/Rahul-999-alpha/WallCraft
+**Repository:** https://github.com/Rahul-999-alpha/clearwalls (renamed from WallCraft, 2026-07-24)
 
 ---
 
